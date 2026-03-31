@@ -1,0 +1,18 @@
+{
+  "name": "brownbear-oracle-backend",
+  "version": "1.0.0",
+  "description": "Backend proxy para Brownbear Oracle — datos reales de Polymarket + análisis Claude",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "node-fetch": "^2.7.0"
+  }
+}
