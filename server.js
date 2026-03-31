@@ -24,7 +24,7 @@ app.get("/markets", async (req, res) => {
     const limit = parseInt(req.query.limit) || 8;
 
     const response = await fetch(
-      `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=20&order=volume&ascending=false`,
+      `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=50&order=volume&ascending=false`,
       { headers: { "Accept": "application/json", "User-Agent": "BrownbearOracle/1.0" } }
     );
 
@@ -35,7 +35,7 @@ app.get("/markets", async (req, res) => {
       .filter(m => {
         try {
           const prices = JSON.parse(m.outcomePrices || "[]");
-          return prices.length >= 2 && m.question && parseFloat(m.volume || 0) > 5000 && m.active && !m.closed;
+          return prices.length >= 2 && m.question && parseFloat(m.volume || 0) > 0 && m.active && !m.closed;
         } catch { return false; }
       })
       .slice(0, limit)
