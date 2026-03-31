@@ -31,11 +31,6 @@ app.get("/markets", async (req, res) => {
     if (!response.ok) throw new Error(`Polymarket API error: ${response.status}`);
     const raw = await response.json();
 
-    if (raw.length > 0) {
-      const sample = raw[0];
-      console.log("Sample slug:", sample.slug, "| conditionId:", sample.conditionId);
-    }
-
     const markets = raw
       .filter(m => {
         try {
@@ -68,11 +63,7 @@ app.get("/markets", async (req, res) => {
           liquidity: parseFloat(m.liquidity || 0),
           endDate: m.endDateIso || m.endDate || null,
           category: detectCategory(m.question),
-          url: m.slug
-            ? `https://polymarket.com/event/${m.slug}`
-            : m.groupItemTitle
-            ? `https://polymarket.com/event/${m.groupItemTitle.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')}`
-            : `https://polymarket.com`
+          url: buildPolyUrl(m)
         };
       });
 
@@ -236,6 +227,17 @@ Return ONLY this JSON:
     res.status(500).json({ success: false, error: err.message });
   }
 });
+
+// ─── Build correct Polymarket URL ────────────────────────────────────────────
+function buildPolyUrl(m) {
+  const eventSlug = m.events && m.events[0] && m.events[0].slug;
+  const marketSlug = m.slug;
+  if (eventSlug && marketSlug) return `https://polymarket.com/event/${eventSlug}/${marketSlug}`;
+  if (eventSlug) return `https://polymarket.com/event/${eventSlug}`;
+  if (marketSlug) return `https://polymarket.com/event/${marketSlug}`;
+  return `https://polymarket.com`;
+}
+
 function detectCategory(question = "") {
   const q = question.toLowerCase();
   if (q.match(/bitcoin|btc|eth|sol|crypto|token|blockchain/)) return "Crypto";
