@@ -35,7 +35,17 @@ app.get("/markets", async (req, res) => {
       .filter(m => {
         try {
           const prices = JSON.parse(m.outcomePrices || "[]");
-          return prices.length >= 2 && m.question && parseFloat(m.volume || 0) > 0 && m.active && !m.closed;
+          const yesPrice = parseFloat(prices[0]);
+          const vol = parseFloat(m.volume || 0);
+          return (
+            prices.length >= 2 &&
+            m.question &&
+            vol > 50000 &&          // mínimo $50k volumen real
+            yesPrice > 0.05 &&      // no mercados casi cerrados
+            yesPrice < 0.95 &&      // precio entre 5% y 95%
+            m.active &&
+            !m.closed
+          );
         } catch { return false; }
       })
       .slice(0, limit)
