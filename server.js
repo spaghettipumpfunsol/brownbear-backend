@@ -40,7 +40,7 @@ app.get("/markets", async (req, res) => {
           return (
             prices.length >= 2 &&
             m.question &&
-            vol > 50000 &&          // mínimo $50k volumen real
+            vol > 10000 &&          // mínimo $10k volumen real
             yesPrice > 0.05 &&      // no mercados casi cerrados
             yesPrice < 0.95 &&      // precio entre 5% y 95%
             m.active &&
