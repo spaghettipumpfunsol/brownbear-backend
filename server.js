@@ -24,7 +24,7 @@ app.get("/markets", async (req, res) => {
     const limit = parseInt(req.query.limit) || 8;
 
     const response = await fetch(
-      `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=50&order=volume&ascending=false`,
+      `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=100&order=volume24hr&ascending=false`,
       { headers: { "Accept": "application/json", "User-Agent": "BrownbearOracle/1.0" } }
     );
 
@@ -36,13 +36,13 @@ app.get("/markets", async (req, res) => {
         try {
           const prices = JSON.parse(m.outcomePrices || "[]");
           const yesPrice = parseFloat(prices[0]);
-          const vol = parseFloat(m.volume || 0);
+          const vol24 = parseFloat(m.volume24hr || 0);
           return (
             prices.length >= 2 &&
             m.question &&
-            vol > 10000 &&          // mínimo $10k volumen real
-            yesPrice > 0.05 &&      // no mercados casi cerrados
-            yesPrice < 0.95 &&      // precio entre 5% y 95%
+            vol24 > 500 &&           // trending: activo en las últimas 24h
+            yesPrice > 0.03 &&
+            yesPrice < 0.97 &&
             m.active &&
             !m.closed
           );
@@ -59,6 +59,7 @@ app.get("/markets", async (req, res) => {
           yesPrice,
           noPrice: parseFloat((1 - yesPrice).toFixed(4)),
           volume: parseFloat(m.volume || 0),
+          volume24hr: parseFloat(m.volume24hr || 0),
           liquidity: parseFloat(m.liquidity || 0),
           endDate: m.endDateIso || m.endDate || null,
           category: detectCategory(m.question),
@@ -133,7 +134,99 @@ Return ONLY this JSON object:
   }
 });
 
-// ─── Helper: detecta categoría del mercado ───────────────────────────────────
+// ─── POST /portfolio — Análisis de portafolio completo ───────────────────────
+app.post("/portfolio", async (req, res) => {
+  const { markets, bankroll } = req.body;
+  if (!markets?.length) return res.status(400).json({ success: false, error: "markets requerido" });
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ success: false, error: "ANTHROPIC_API_KEY no configurada" });
+
+  try {
+    // Build summary of all analyzed markets
+    const summary = markets
+      .filter(m => m.analysis && m.analysis.betDirection !== "SKIP")
+      .sort((a, b) => Math.abs(b.analysis.edge) - Math.abs(a.analysis.edge))
+      .map(m => ({
+        id: m.id,
+        question: m.question.slice(0, 80),
+        yesPrice: (m.yesPrice * 100).toFixed(1) + "%",
+        volume24hr: "$" + (m.volume24hr / 1000).toFixed(0) + "k",
+        edge: (m.analysis.edge > 0 ? "+" : "") + m.analysis.edge.toFixed(1) + "%",
+        direction: m.analysis.betDirection,
+        confidence: m.analysis.confidence,
+        trueProbability: m.analysis.trueProbability + "%",
+        bias: m.analysis.biasDetected,
+        endDate: m.endDate
+      }));
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: `You are a professional prediction market portfolio manager.
+Given analyzed markets, build the optimal betting portfolio for a given bankroll.
+Maximize expected value while managing risk through position sizing and diversification.
+Rules: max 20% per position, max 4 positions, only high/medium confidence, min edge 10%.
+Respond ONLY with raw JSON. No markdown, no backticks.`,
+        messages: [{
+          role: "user",
+          content: `Bankroll: $${bankroll || 100}
+
+Analyzed markets (sorted by edge):
+${JSON.stringify(summary, null, 2)}
+
+Build the optimal portfolio. Consider: edge size, confidence, volume24hr (liquidity), days to close, diversification across categories.
+
+Return ONLY this JSON:
+{
+  "positions": [
+    {
+      "id": "market-id",
+      "question": "short version",
+      "direction": "YES or NO",
+      "betSize": 15.00,
+      "edge": 18.5,
+      "confidence": "high",
+      "reasoning": "one sentence why this is the best position"
+    }
+  ],
+  "totalBet": 35.00,
+  "expectedReturn": 12.50,
+  "reserveAmt": 65.00,
+  "portfolioReasoning": "2 sentence explanation of overall strategy and why these positions together make sense"
+}`
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(`Claude error ${response.status}: ${err?.error?.message || "unknown"}`);
+    }
+
+    const data = await response.json();
+    const raw = (data.content || [])
+      .filter(b => b.type === "text").map(b => b.text).join("")
+      .replace(/```json|```/g, "").trim();
+
+    const s = raw.indexOf("{"), e = raw.lastIndexOf("}");
+    if (s === -1 || e === -1) throw new Error("No JSON in Claude response");
+    const portfolio = JSON.parse(raw.slice(s, e + 1));
+
+    res.json({ success: true, portfolio });
+
+  } catch (err) {
+    console.error("Portfolio error:", err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 function detectCategory(question = "") {
   const q = question.toLowerCase();
   if (q.match(/bitcoin|btc|eth|sol|crypto|token|blockchain/)) return "Crypto";
