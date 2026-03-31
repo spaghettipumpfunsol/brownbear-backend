@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brownbear Oracle</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bear: #D2691E;
+    --bear-dark: #8B4513;
+    --bear-glow: rgba(210,105,30,0.15);
+    --bg: #080604;
+    --surface: rgba(20,12,6,0.85);
+    --border: rgba(139,69,19,0.2);
+    --text: #e8ddd0;
+    --muted: #7a5c40;
+    --green: #00c878;
+    --red: #e03050;
+    --gold: #D2691E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background effects */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(139,69,19,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,69,19,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .bg-glow {
+    position: fixed; top: -300px; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 600px; z-index: 0;
+    background: radial-gradient(ellipse, rgba(139,69,19,.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .wrap {
+    position: relative; z-index: 2;
+    max-width: 900px; margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  /* Header */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    flex-wrap: wrap; gap: 16px;
+  }
+
+  .logo { display: flex; align-items: center; gap: 14px; }
+
+  .logo-icon {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--bear-dark), var(--bear));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+    box-shadow: 0 0 30px rgba(139,69,19,.3);
+  }
+
+  .logo-title {
+    font-size: 20px; font-weight: 800;
+    letter-spacing: 2.5px; color: var(--bear);
+    text-transform: uppercase;
+  }
+
+  .logo-sub {
+    font-size: 10px; color: var(--muted);
+    letter-spacing: 1.5px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; font-family: 'Space Mono', monospace;
+    padding: 5px 12px; border-radius: 5px;
+  }
+
+  .live-badge.live { background: rgba(0,200,120,.08); border: 1px solid rgba(0,200,120,.2); color: var(--green); }
+  .live-badge.demo { background: rgba(139,69,19,.08); border: 1px solid var(--border); color: var(--muted); }
+
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+  }
+  .live-dot.on { background: var(--green); animation: pulse 1.5s infinite; }
+  .live-dot.off { background: var(--muted); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .stats { display: flex; gap: 10px; }
+
+  .stat {
+    background: rgba(139,69,19,.07);
+    border: 1px solid var(--border);
+    border-radius: 7px; padding: 6px 14px; text-align: center;
+  }
+
+  .stat-val {
+    font-size: 16px; font-weight: 700; color: var(--bear);
+    font-family: 'Space Mono', monospace; display: block;
+  }
+
+  .stat-lbl {
+    font-size: 9px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+
+  .budget-box {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(139,69,19,.05);
+    border: 1px solid var(--border);
+    border-radius: 9px; padding: 8px 14px;
+  }
+
+  .budget-label {
+    font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  #budget-input {
+    background: transparent; border: none; outline: none;
+    color: var(--bear); font-family: 'Space Mono', monospace;
+    font-size: 16px; font-weight: 700; width: 80px;
+  }
+
+  .scan-btn {
+    display: flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--bear-dark), var(--bear));
+    border: none; border-radius: 9px;
+    padding: 10px 24px; color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer; transition: all .2s; flex-shrink: 0;
+  }
+
+  .scan-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(139,69,19,.4);
+  }
+
+  .scan-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .btn-dot {
+    width: 7px; height: 7px; background: #fff;
+    border-radius: 50%; animation: pulse 1s infinite;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    background: rgba(139,69,19,.06);
+    border: 1px solid var(--border);
+    border-radius: 9px; padding: 14px 18px;
+    margin-bottom: 18px; display: none;
+  }
+
+  .progress-wrap.show { display: block; }
+
+  .progress-top {
+    display: flex; justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 11px; font-family: 'Space Mono', monospace;
+    color: var(--muted);
+  }
+
+  .progress-track {
+    height: 3px; background: rgba(139,69,19,.12);
+    border-radius: 2px; overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--bear-dark), var(--bear));
+    border-radius: 2px; transition: width .5s ease;
+    width: 0%;
+  }
+
+  .progress-msg {
+    margin-top: 8px; font-size: 10px; color: #4a3020;
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Error */
+  .error-box {
+    background: rgba(224,48,80,.07);
+    border: 1px solid rgba(224,48,80,.2);
+    border-radius: 9px; padding: 14px 18px;
+    margin-bottom: 16px; display: none;
+    font-size: 11px; color: var(--red);
+    font-family: 'Space Mono', monospace; line-height: 1.7;
+  }
+
+  .error-box.show { display: block; }
+
+  /* Filters */
+  .filters {
+    display: flex; gap: 6px; margin-bottom: 18px;
+    flex-wrap: wrap; display: none;
+  }
+
+  .filters.show { display: flex; }
+
+  .filter-btn {
+    padding: 5px 14px; border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+  }
+
+  .filter-btn.active {
+    background: rgba(139,69,19,.12);
+    border-color: rgba(210,105,30,.4);
+    color: var(--bear);
+  }
+
+  /* Empty state */
+  .empty {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+
+  .empty-icon { font-size: 52px; margin-bottom: 16px; opacity: .4; display: block; }
+  .empty-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #6b5240; }
+  .empty-sub { font-size: 11px; font-family: 'Space Mono', monospace; line-height: 1.9; color: #4a3020; }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 11px; margin-bottom: 9px;
+    overflow: hidden; transition: border-color .2s;
+    animation: fadeIn .4s ease;
+  }
+
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+  .card:hover { border-color: rgba(139,69,19,.35); }
+  .card.pos { border-left: 3px solid var(--green); }
+  .card.neg { border-left: 3px solid var(--red); }
+  .card.neu { border-left: 3px solid var(--gold); }
+  .card.skp { border-left: 3px solid #3a2010; opacity: .65; }
+  .card.loading-card { border-left: 3px solid rgba(139,69,19,.2); }
+
+  .card-main {
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 12px; padding: 13px 16px;
+    cursor: pointer; align-items: center;
+  }
+
+  .card-cat {
+    font-size: 9px; font-family: 'Space Mono', monospace;
+    padding: 1px 7px; border-radius: 3px;
+    background: rgba(139,69,19,.08); color: var(--muted);
+    border: 1px solid rgba(139,69,19,.15);
+    text-transform: uppercase; letter-spacing: .5px;
+    display: inline-block; margin-bottom: 5px;
+  }
+
+  .card-q {
+    font-size: 13px; font-weight: 600; color: #c8b8a0;
+    line-height: 1.35; margin-bottom: 6px;
+  }
+
+  .card-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .badge {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    padding: 1px 7px; border-radius: 3px; border: 1px solid;
+  }
+
+  .badge-vol { color: var(--muted); border-color: rgba(122,92,64,.3); background: rgba(122,92,64,.08); }
+  .badge-bias { color: #c89040; border-color: rgba(200,144,64,.3); background: rgba(200,144,64,.06); }
+  .badge-conf { color: #9b8fff; border-color: rgba(155,143,255,.3); background: rgba(155,143,255,.06); }
+
+  .card-nums {
+    display: flex; flex-direction: column;
+    align-items: flex-end; gap: 4px; flex-shrink: 0; min-width: 95px;
+  }
+
+  .edge-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 18px; font-weight: 700;
+  }
+
+  .edge-pos { color: var(--green); }
+  .edge-neg { color: var(--red); }
+  .edge-neu { color: var(--gold); }
+
+  .price-row { display: flex; gap: 5px; align-items: center; }
+
+  .price-mkt {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    padding: 1px 6px; border-radius: 3px;
+    background: rgba(122,92,64,.12); color: #8b7060;
+    border: 1px solid rgba(122,92,64,.2);
+  }
+
+  .price-ai {
+    font-family: 'Space Mono', monospace; font-size: 9px;
+    padding: 1px 6px; border-radius: 3px;
+    font-weight: 700; color: #1a0a00;
+  }
+
+  .price-ai.pp { background: var(--green); }
+  .price-ai.pn { background: var(--red); }
+  .price-ai.pz { background: var(--gold); }
+
+  .dir-badge {
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 1px; padding: 3px 10px;
+    border-radius: 4px; font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .dir-yes { background: rgba(0,200,120,.1); color: var(--green); border: 1px solid rgba(0,200,120,.2); }
+  .dir-no  { background: rgba(224,48,80,.1); color: var(--red);   border: 1px solid rgba(224,48,80,.2); }
+  .dir-skip{ background: rgba(60,32,16,.2);  color: #4a3020;      border: 1px solid rgba(60,32,16,.3); }
+
+  /* Skeleton */
+  .skel {
+    background: linear-gradient(90deg,
+      rgba(139,69,19,.04) 0%, rgba(139,69,19,.1) 50%, rgba(139,69,19,.04) 100%);
+    background-size: 200% 100%;
+    animation: shim 1.4s infinite; border-radius: 3px;
+    display: inline-block;
+  }
+
+  @keyframes shim { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+
+  .analyzing-tag {
+    font-size: 9px; color: #3a2010;
+    font-family: 'Space Mono', monospace;
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+
+  /* Card expanded */
+  .card-expanded {
+    padding: 0 16px 14px;
+    border-top: 1px solid rgba(139,69,19,.1);
+    padding-top: 13px;
+    display: none;
+  }
+
+  .card-expanded.open { display: block; animation: fadeIn .3s ease; }
+
+  .reasoning {
+    background: rgba(0,0,0,.2);
+    border: 1px solid rgba(139,69,19,.1);
+    border-radius: 8px; padding: 11px 13px;
+    font-size: 11px; color: #8b6a50;
+    line-height: 1.65; margin-bottom: 11px;
+  }
+
+  .poly-link {
+    display: block; font-size: 10px; color: var(--bear);
+    font-family: 'Space Mono', monospace;
+    text-decoration: none; margin-bottom: 11px;
+  }
+
+  .poly-link:hover { text-decoration: underline; }
+
+  .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+  .pos-item {
+    background: rgba(139,69,19,.05);
+    border: 1px solid rgba(139,69,19,.12);
+    border-radius: 7px; padding: 10px; text-align: center;
+  }
+
+  .pos-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 15px; font-weight: 700;
+    color: var(--bear); display: block; margin-bottom: 2px;
+  }
+
+  .pos-lbl {
+    font-size: 8px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+
+  /* Disclaimer */
+  .disclaimer {
+    margin-top: 32px; padding: 13px 16px;
+    background: rgba(139,69,19,.04);
+    border: 1px solid rgba(139,69,19,.1);
+    border-radius: 8px; font-size: 10px; color: #5a4030;
+    font-family: 'Space Mono', monospace; line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🐻</div>
+      <div>
+        <div class="logo-title">Brownbear Oracle</div>
+        <div class="logo-sub">AI Alpha Scanner · Polymarket</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="live-badge demo" id="live-badge">
+        <div class="live-dot off" id="live-dot"></div>
+        <span id="live-text">CONNECTING...</span>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-val" id="stat-markets">—</span>
+          <span class="stat-lbl">Markets</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-edges" style="color:var(--green)">—</span>
+          <span class="stat-lbl">Edges</span>
+        </div>
+        <div class="stat">
+          <span class="stat-val" id="stat-avg">—%</span>
+          <span class="stat-lbl">Avg Edge</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="budget-box">
+      <span class="budget-label">$</span>
+      <input id="budget-input" type="number" value="100" min="10">
+      <span class="budget-label">bankroll</span>
+    </div>
+    <button class="scan-btn" id="scan-btn" onclick="runScan()">
+      <div class="btn-dot"></div>
+      <span id="scan-label">SCAN MARKETS</span>
+    </button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-top">
+      <span>🐻 BROWNBEAR ANALYZING</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-msg" id="progress-msg">Cargando mercados de Polymarket...</div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-box" id="error-box"></div>
+
+  <!-- Filters -->
+  <div class="filters" id="filters">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('edge', this)">Edge ≥12%</button>
+    <button class="filter-btn" onclick="setFilter('conf', this)">High Conf</button>
+    <button class="filter-btn" onclick="setFilter('yes', this)">Buy YES</button>
+    <button class="filter-btn" onclick="setFilter('no', this)">Buy NO</button>
+  </div>
+
+  <!-- Markets -->
+  <div id="markets-wrap">
+    <div class="empty">
+      <span class="empty-icon">🐻</span>
+      <div class="empty-title">Brownbear Oracle listo</div>
+      <div class="empty-sub">
+        Conectado a Polymarket en vivo<br>
+        Presiona SCAN para análisis real con Claude
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer" id="disclaimer" style="display:none">
+    ⚠ Solo fines educativos. Los mercados de predicción implican riesgo financiero real.
+    Verifica todos los precios en polymarket.com antes de ejecutar cualquier posición.
+    Nunca inviertas más de lo que puedes perder.
+  </div>
+
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+const BACKEND = 'https://brownbear-backend-production.up.railway.app';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let allMarkets = [];
+let currentFilter = 'all';
+let scanning = false;
+
+// ─── Init: check backend health ───────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const res = await fetch(`${BACKEND}/`);
+    const data = await res.json();
+    if (data.status === 'ok') {
+      setBadge(true);
+    }
+  } catch(e) {
+    setBadge(false);
+  }
+}
+
+function setBadge(live) {
+  const badge = document.getElementById('live-badge');
+  const dot = document.getElementById('live-dot');
+  const text = document.getElementById('live-text');
+  if (live) {
+    badge.className = 'live-badge live';
+    dot.className = 'live-dot on';
+    text.textContent = 'LIVE DATA';
+  } else {
+    badge.className = 'live-badge demo';
+    dot.className = 'live-dot off';
+    text.textContent = 'OFFLINE';
+  }
+}
+
+// ─── Main scan ────────────────────────────────────────────────────────────────
+async function runScan() {
+  if (scanning) return;
+  scanning = true;
+  allMarkets = [];
+  currentFilter = 'all';
+
+  // Reset UI
+  document.getElementById('scan-btn').disabled = true;
+  document.getElementById('scan-label').textContent = 'SCANNING...';
+  document.getElementById('progress-wrap').classList.add('show');
+  document.getElementById('error-box').classList.remove('show');
+  document.getElementById('filters').classList.remove('show');
+  document.getElementById('disclaimer').style.display = 'none';
+  document.getElementById('markets-wrap').innerHTML = '';
+  setProgress(5, 'Conectando a Polymarket...');
+
+  try {
+    // 1. Fetch markets
+    const mRes = await fetch(`${BACKEND}/markets?limit=8`);
+    if (!mRes.ok) throw new Error(`Markets error: ${mRes.status}`);
+    const mData = await mRes.json();
+    if (!mData.success) throw new Error(mData.error);
+
+    const markets = mData.markets;
+    setProgress(15, `${markets.length} mercados encontrados. Analizando con Claude...`);
+    document.getElementById('stat-markets').textContent = markets.length;
+    document.getElementById('filters').classList.add('show');
+
+    // Render skeleton cards
+    markets.forEach(m => renderCard(m, null, true));
+
+    // 2. Analyze each market
+    for (let i = 0; i < markets.length; i++) {
+      const m = markets[i];
+      setProgress(
+        15 + Math.round(((i) / markets.length) * 82),
+        `→ ${m.question.slice(0, 60)}...`
+      );
+
+      try {
+        const aRes = await fetch(`${BACKEND}/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ market: m })
+        });
+        const aData = await aRes.json();
+        if (aData.success) {
+          allMarkets.push({ ...m, analysis: aData.analysis });
+          updateCard(m.id, m, aData.analysis);
+        } else {
+          allMarkets.push({ ...m, analysis: null });
+        }
+      } catch(e) {
+        allMarkets.push({ ...m, analysis: null });
+      }
+
+      setProgress(
+        15 + Math.round(((i + 1) / markets.length) * 82),
+        `✓ ${i + 1}/${markets.length} analizados`
+      );
+      updateStats();
+    }
+
+    setProgress(100, '✓ Scan completo');
+    setTimeout(() => {
+      document.getElementById('progress-wrap').classList.remove('show');
+    }, 1500);
+
+    document.getElementById('disclaimer').style.display = 'block';
+
+  } catch(e) {
+    const box = document.getElementById('error-box');
+    box.textContent = '⚠ ' + e.message;
+    box.classList.add('show');
+    document.getElementById('progress-wrap').classList.remove('show');
+  }
+
+  document.getElementById('scan-btn').disabled = false;
+  document.getElementById('scan-label').textContent = 'RE-SCAN';
+  scanning = false;
+}
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+function setProgress(pct, msg) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  if (msg) document.getElementById('progress-msg').textContent = msg;
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const analyzed = allMarkets.filter(m => m.analysis);
+  const edges = analyzed.filter(m => m.analysis.betDirection !== 'SKIP' && Math.abs(m.analysis.edge || 0) >= 10);
+  const avg = analyzed.length
+    ? (analyzed.reduce((s, m) => s + Math.abs(m.analysis?.edge || 0), 0) / analyzed.length).toFixed(1)
+    : '—';
+
+  document.getElementById('stat-edges').textContent = edges.length || '—';
+  document.getElementById('stat-avg').textContent = avg + '%';
+}
+
+// ─── Filter ───────────────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+}
+
+function passesFilter(m) {
+  const a = m.analysis;
+  if (currentFilter === 'all') return true;
+  if (!a) return false;
+  if (currentFilter === 'edge') return Math.abs(a.edge || 0) >= 12;
+  if (currentFilter === 'conf') return a.confidence === 'high';
+  if (currentFilter === 'yes') return a.betDirection === 'YES';
+  if (currentFilter === 'no') return a.betDirection === 'NO';
+  return true;
+}
+
+function renderAll() {
+  const wrap = document.getElementById('markets-wrap');
+  wrap.innerHTML = '';
+  allMarkets.filter(passesFilter).forEach(m => renderCard(m, m.analysis, false));
+}
+
+// ─── Card rendering ───────────────────────────────────────────────────────────
+function cardClass(a) {
+  if (!a) return 'loading-card';
+  if (a.betDirection === 'SKIP') return 'skp';
+  if (Math.abs(a.edge || 0) < 5) return 'neu';
+  return a.edge > 0 ? 'pos' : 'neg';
+}
+
+function renderCard(market, analysis, isSkeleton) {
+  const wrap = document.getElementById('markets-wrap');
+  const div = document.createElement('div');
+  div.className = `card ${cardClass(analysis)}`;
+  div.id = `card-${market.id}`;
+  div.innerHTML = buildCardHTML(market, analysis, isSkeleton);
+  wrap.appendChild(div);
+}
+
+function updateCard(id, market, analysis) {
+  const div = document.getElementById(`card-${id}`);
+  if (div) {
+    div.className = `card ${cardClass(analysis)}`;
+    div.innerHTML = buildCardHTML(market, analysis, false);
+  }
+}
+
+function buildCardHTML(m, a, isSkeleton) {
+  const yp = m.yesPrice || 0.5;
+  const budget = parseFloat(document.getElementById('budget-input').value) || 100;
+
+  let numsHTML = '';
+  if (isSkeleton || !a) {
+    numsHTML = `
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+        <div class="skel" style="width:70px;height:18px"></div>
+        <div class="skel" style="width:80px;height:12px"></div>
+        <div class="analyzing-tag"><span class="spin">⟳</span> analyzing</div>
+      </div>`;
+  } else {
+    const edgeCls = a.edge > 0 ? 'edge-pos' : a.edge < -5 ? 'edge-neg' : 'edge-neu';
+    const aiCls = a.edge > 0 ? 'pp' : a.edge < -5 ? 'pn' : 'pz';
+    const dirCls = a.betDirection === 'YES' ? 'dir-yes' : a.betDirection === 'NO' ? 'dir-no' : 'dir-skip';
+    const dirTxt = a.betDirection === 'YES' ? '▲ BUY YES' : a.betDirection === 'NO' ? '▼ BUY NO' : '— SKIP';
+    numsHTML = `
+      <div class="card-nums">
+        <span class="edge-val ${edgeCls}">${a.edge > 0 ? '+' : ''}${(a.edge||0).toFixed(1)}%</span>
+        <div class="price-row">
+          <span class="price-mkt">MKT ${(yp*100).toFixed(0)}%</span>
+          <span class="price-ai ${aiCls}">AI ${a.trueProbability}%</span>
+        </div>
+        <span class="dir-badge ${dirCls}">${dirTxt}</span>
+      </div>`;
+  }
+
+  let expandedHTML = '';
+  if (a) {
+    const dollarAlloc = ((a.allocatePct || 0) / 100 * budget).toFixed(2);
+    const potRet = a.betDirection !== 'SKIP'
+      ? a.betDirection === 'YES'
+        ? (parseFloat(dollarAlloc) / yp * (1 - yp)).toFixed(2)
+        : (parseFloat(dollarAlloc) / (1 - yp) * yp).toFixed(2)
+      : '0';
+
+    expandedHTML = `
+      <div class="card-expanded" id="exp-${m.id}">
+        <div class="reasoning">🐻 ${a.reasoning}</div>
+        ${m.url ? `<a class="poly-link" href="${m.url}" target="_blank">→ Ver en Polymarket ↗</a>` : ''}
+        <div class="pos-grid">
+          <div class="pos-item"><span class="pos-val">$${dollarAlloc}</span><span class="pos-lbl">Bet Size</span></div>
+          <div class="pos-item"><span class="pos-val">${a.allocatePct}%</span><span class="pos-lbl">Bankroll</span></div>
+          <div class="pos-item"><span class="pos-val" style="color:var(--green)">+$${potRet}</span><span class="pos-lbl">Win Est.</span></div>
+        </div>
+      </div>`;
+  }
+
+  const biasBadge = a && a.biasDetected && !['none','None','NONE'].includes(a.biasDetected)
+    ? `<span class="badge badge-bias">⚠ ${a.biasDetected}</span>` : '';
+  const confBadge = a
+    ? `<span class="badge badge-conf">${a.confidence === 'high' ? '●' : a.confidence === 'medium' ? '◑' : '○'} ${a.confidence}</span>` : '';
+
+  return `
+    <div class="card-main" onclick="toggleCard('${m.id}')">
+      <div>
+        <span class="card-cat">${m.category}</span>
+        <div class="card-q">${m.question}</div>
+        <div class="card-meta">
+          <span class="badge badge-vol">VOL $${(m.volume/1e6).toFixed(1)}M</span>
+          ${biasBadge}${confBadge}
+        </div>
+      </div>
+      ${numsHTML}
+    </div>
+    ${expandedHTML}`;
+}
+
+function toggleCard(id) {
+  const exp = document.getElementById(`exp-${id}`);
+  if (exp) exp.classList.toggle('open');
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+checkHealth();
+</script>
+</body>
+</html>

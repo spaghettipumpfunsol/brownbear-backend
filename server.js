@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -9,8 +10,11 @@ const PORT = process.env.PORT || 3001;
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
+// Serve the frontend
+app.use(express.static(path.join(__dirname)));
+
 // ─── Health check ─────────────────────────────────────────────────────────────
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "Brownbear Oracle Backend", time: new Date().toISOString() });
 });
 
