@@ -31,7 +31,11 @@ app.get("/markets", async (req, res) => {
     if (!response.ok) throw new Error(`Polymarket API error: ${response.status}`);
     const raw = await response.json();
 
-    const markets = raw
+    if (raw.length > 0) {
+      const sample = raw[0];
+      console.log("Sample market fields:", Object.keys(sample).join(', '));
+      console.log("Sample slug:", sample.slug, "| conditionId:", sample.conditionId, "| id:", sample.id);
+    }
       .filter(m => {
         try {
           const prices = JSON.parse(m.outcomePrices || "[]");
@@ -63,7 +67,11 @@ app.get("/markets", async (req, res) => {
           liquidity: parseFloat(m.liquidity || 0),
           endDate: m.endDateIso || m.endDate || null,
           category: detectCategory(m.question),
-          url: `https://polymarket.com/event/${m.slug || m.id}`
+          url: m.slug
+            ? `https://polymarket.com/event/${m.slug}`
+            : m.groupItemTitle
+            ? `https://polymarket.com/event/${m.groupItemTitle.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')}`
+            : `https://polymarket.com`
         };
       });
 
