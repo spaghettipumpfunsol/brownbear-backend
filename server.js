@@ -33,9 +33,10 @@ app.get("/markets", async (req, res) => {
 
     if (raw.length > 0) {
       const sample = raw[0];
-      console.log("Sample market fields:", Object.keys(sample).join(', '));
-      console.log("Sample slug:", sample.slug, "| conditionId:", sample.conditionId, "| id:", sample.id);
+      console.log("Sample slug:", sample.slug, "| conditionId:", sample.conditionId);
     }
+
+    const markets = raw
       .filter(m => {
         try {
           const prices = JSON.parse(m.outcomePrices || "[]");
