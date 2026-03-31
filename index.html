@@ -6,424 +6,176 @@
 <title>Brownbear Oracle</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bear: #D2691E;
-    --bear-dark: #8B4513;
-    --bear-glow: rgba(210,105,30,0.15);
-    --bg: #080604;
-    --surface: rgba(20,12,6,0.85);
-    --border: rgba(139,69,19,0.2);
-    --text: #e8ddd0;
-    --muted: #7a5c40;
-    --green: #00c878;
-    --red: #e03050;
-    --gold: #D2691E;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Background effects */
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0;
-    background-image:
-      linear-gradient(rgba(139,69,19,.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(139,69,19,.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-  }
-
-  .bg-glow {
-    position: fixed; top: -300px; left: 50%; transform: translateX(-50%);
-    width: 800px; height: 600px; z-index: 0;
-    background: radial-gradient(ellipse, rgba(139,69,19,.06) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .wrap {
-    position: relative; z-index: 2;
-    max-width: 900px; margin: 0 auto;
-    padding: 24px 16px 80px;
-  }
-
-  /* Header */
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 0 28px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
-    flex-wrap: wrap; gap: 16px;
-  }
-
-  .logo { display: flex; align-items: center; gap: 14px; }
-
-  .logo-icon {
-    width: 50px; height: 50px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--bear-dark), var(--bear));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; flex-shrink: 0;
-    box-shadow: 0 0 30px rgba(139,69,19,.3);
-  }
-
-  .logo-title {
-    font-size: 20px; font-weight: 800;
-    letter-spacing: 2.5px; color: var(--bear);
-    text-transform: uppercase;
-  }
-
-  .logo-sub {
-    font-size: 10px; color: var(--muted);
-    letter-spacing: 1.5px;
-    font-family: 'Space Mono', monospace;
-  }
-
-  .header-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-  .live-badge {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 10px; font-family: 'Space Mono', monospace;
-    padding: 5px 12px; border-radius: 5px;
-  }
-
-  .live-badge.live { background: rgba(0,200,120,.08); border: 1px solid rgba(0,200,120,.2); color: var(--green); }
-  .live-badge.demo { background: rgba(139,69,19,.08); border: 1px solid var(--border); color: var(--muted); }
-
-  .live-dot {
-    width: 7px; height: 7px; border-radius: 50%;
-  }
-  .live-dot.on { background: var(--green); animation: pulse 1.5s infinite; }
-  .live-dot.off { background: var(--muted); }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-
-  .stats { display: flex; gap: 10px; }
-
-  .stat {
-    background: rgba(139,69,19,.07);
-    border: 1px solid var(--border);
-    border-radius: 7px; padding: 6px 14px; text-align: center;
-  }
-
-  .stat-val {
-    font-size: 16px; font-weight: 700; color: var(--bear);
-    font-family: 'Space Mono', monospace; display: block;
-  }
-
-  .stat-lbl {
-    font-size: 9px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 1px;
-  }
-
-  /* Controls */
-  .controls {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 20px; flex-wrap: wrap;
-  }
-
-  .budget-box {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(139,69,19,.05);
-    border: 1px solid var(--border);
-    border-radius: 9px; padding: 8px 14px;
-  }
-
-  .budget-label {
-    font-size: 10px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: 1px;
-    font-family: 'Space Mono', monospace;
-  }
-
-  #budget-input {
-    background: transparent; border: none; outline: none;
-    color: var(--bear); font-family: 'Space Mono', monospace;
-    font-size: 16px; font-weight: 700; width: 80px;
-  }
-
-  .scan-btn {
-    display: flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, var(--bear-dark), var(--bear));
-    border: none; border-radius: 9px;
-    padding: 10px 24px; color: #fff;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px; font-weight: 700;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    cursor: pointer; transition: all .2s; flex-shrink: 0;
-  }
-
-  .scan-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(139,69,19,.4);
-  }
-
-  .scan-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-  .btn-dot {
-    width: 7px; height: 7px; background: #fff;
-    border-radius: 50%; animation: pulse 1s infinite;
-  }
-
-  /* Progress */
-  .progress-wrap {
-    background: rgba(139,69,19,.06);
-    border: 1px solid var(--border);
-    border-radius: 9px; padding: 14px 18px;
-    margin-bottom: 18px; display: none;
-  }
-
-  .progress-wrap.show { display: block; }
-
-  .progress-top {
-    display: flex; justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 11px; font-family: 'Space Mono', monospace;
-    color: var(--muted);
-  }
-
-  .progress-track {
-    height: 3px; background: rgba(139,69,19,.12);
-    border-radius: 2px; overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--bear-dark), var(--bear));
-    border-radius: 2px; transition: width .5s ease;
-    width: 0%;
-  }
-
-  .progress-msg {
-    margin-top: 8px; font-size: 10px; color: #4a3020;
-    font-family: 'Space Mono', monospace;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-
-  /* Error */
-  .error-box {
-    background: rgba(224,48,80,.07);
-    border: 1px solid rgba(224,48,80,.2);
-    border-radius: 9px; padding: 14px 18px;
-    margin-bottom: 16px; display: none;
-    font-size: 11px; color: var(--red);
-    font-family: 'Space Mono', monospace; line-height: 1.7;
-  }
-
-  .error-box.show { display: block; }
-
-  /* Filters */
-  .filters {
-    display: flex; gap: 6px; margin-bottom: 18px;
-    flex-wrap: wrap; display: none;
-  }
-
-  .filters.show { display: flex; }
-
-  .filter-btn {
-    padding: 5px 14px; border-radius: 6px;
-    border: 1px solid var(--border);
-    background: transparent; color: var(--muted);
-    font-family: 'Syne', sans-serif;
-    font-size: 11px; font-weight: 600;
-    cursor: pointer; transition: all .15s;
-  }
-
-  .filter-btn.active {
-    background: rgba(139,69,19,.12);
-    border-color: rgba(210,105,30,.4);
-    color: var(--bear);
-  }
-
-  /* Empty state */
-  .empty {
-    text-align: center; padding: 60px 20px; color: var(--muted);
-  }
-
-  .empty-icon { font-size: 52px; margin-bottom: 16px; opacity: .4; display: block; }
-  .empty-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #6b5240; }
-  .empty-sub { font-size: 11px; font-family: 'Space Mono', monospace; line-height: 1.9; color: #4a3020; }
-
-  /* Cards */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 11px; margin-bottom: 9px;
-    overflow: hidden; transition: border-color .2s;
-    animation: fadeIn .4s ease;
-  }
-
-  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
-
-  .card:hover { border-color: rgba(139,69,19,.35); }
-  .card.pos { border-left: 3px solid var(--green); }
-  .card.neg { border-left: 3px solid var(--red); }
-  .card.neu { border-left: 3px solid var(--gold); }
-  .card.skp { border-left: 3px solid #3a2010; opacity: .65; }
-  .card.loading-card { border-left: 3px solid rgba(139,69,19,.2); }
-
-  .card-main {
-    display: grid; grid-template-columns: 1fr auto;
-    gap: 12px; padding: 13px 16px;
-    cursor: pointer; align-items: center;
-  }
-
-  .card-cat {
-    font-size: 9px; font-family: 'Space Mono', monospace;
-    padding: 1px 7px; border-radius: 3px;
-    background: rgba(139,69,19,.08); color: var(--muted);
-    border: 1px solid rgba(139,69,19,.15);
-    text-transform: uppercase; letter-spacing: .5px;
-    display: inline-block; margin-bottom: 5px;
-  }
-
-  .card-q {
-    font-size: 13px; font-weight: 600; color: #c8b8a0;
-    line-height: 1.35; margin-bottom: 6px;
-  }
-
-  .card-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-
-  .badge {
-    font-family: 'Space Mono', monospace; font-size: 9px;
-    padding: 1px 7px; border-radius: 3px; border: 1px solid;
-  }
-
-  .badge-vol { color: var(--muted); border-color: rgba(122,92,64,.3); background: rgba(122,92,64,.08); }
-  .badge-bias { color: #c89040; border-color: rgba(200,144,64,.3); background: rgba(200,144,64,.06); }
-  .badge-conf { color: #9b8fff; border-color: rgba(155,143,255,.3); background: rgba(155,143,255,.06); }
-
-  .card-nums {
-    display: flex; flex-direction: column;
-    align-items: flex-end; gap: 4px; flex-shrink: 0; min-width: 95px;
-  }
-
-  .edge-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 18px; font-weight: 700;
-  }
-
-  .edge-pos { color: var(--green); }
-  .edge-neg { color: var(--red); }
-  .edge-neu { color: var(--gold); }
-
-  .price-row { display: flex; gap: 5px; align-items: center; }
-
-  .price-mkt {
-    font-family: 'Space Mono', monospace; font-size: 9px;
-    padding: 1px 6px; border-radius: 3px;
-    background: rgba(122,92,64,.12); color: #8b7060;
-    border: 1px solid rgba(122,92,64,.2);
-  }
-
-  .price-ai {
-    font-family: 'Space Mono', monospace; font-size: 9px;
-    padding: 1px 6px; border-radius: 3px;
-    font-weight: 700; color: #1a0a00;
-  }
-
-  .price-ai.pp { background: var(--green); }
-  .price-ai.pn { background: var(--red); }
-  .price-ai.pz { background: var(--gold); }
-
-  .dir-badge {
-    font-size: 10px; font-weight: 800;
-    letter-spacing: 1px; padding: 3px 10px;
-    border-radius: 4px; font-family: 'Space Mono', monospace;
-    white-space: nowrap;
-  }
-
-  .dir-yes { background: rgba(0,200,120,.1); color: var(--green); border: 1px solid rgba(0,200,120,.2); }
-  .dir-no  { background: rgba(224,48,80,.1); color: var(--red);   border: 1px solid rgba(224,48,80,.2); }
-  .dir-skip{ background: rgba(60,32,16,.2);  color: #4a3020;      border: 1px solid rgba(60,32,16,.3); }
-
-  /* Skeleton */
-  .skel {
-    background: linear-gradient(90deg,
-      rgba(139,69,19,.04) 0%, rgba(139,69,19,.1) 50%, rgba(139,69,19,.04) 100%);
-    background-size: 200% 100%;
-    animation: shim 1.4s infinite; border-radius: 3px;
-    display: inline-block;
-  }
-
-  @keyframes shim { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
-
-  .analyzing-tag {
-    font-size: 9px; color: #3a2010;
-    font-family: 'Space Mono', monospace;
-    display: flex; align-items: center; gap: 4px;
-  }
-
-  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-  .spin { display: inline-block; animation: spin 1s linear infinite; }
-
-  /* Card expanded */
-  .card-expanded {
-    padding: 0 16px 14px;
-    border-top: 1px solid rgba(139,69,19,.1);
-    padding-top: 13px;
-    display: none;
-  }
-
-  .card-expanded.open { display: block; animation: fadeIn .3s ease; }
-
-  .reasoning {
-    background: rgba(0,0,0,.2);
-    border: 1px solid rgba(139,69,19,.1);
-    border-radius: 8px; padding: 11px 13px;
-    font-size: 11px; color: #8b6a50;
-    line-height: 1.65; margin-bottom: 11px;
-  }
-
-  .poly-link {
-    display: block; font-size: 10px; color: var(--bear);
-    font-family: 'Space Mono', monospace;
-    text-decoration: none; margin-bottom: 11px;
-  }
-
-  .poly-link:hover { text-decoration: underline; }
-
-  .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-
-  .pos-item {
-    background: rgba(139,69,19,.05);
-    border: 1px solid rgba(139,69,19,.12);
-    border-radius: 7px; padding: 10px; text-align: center;
-  }
-
-  .pos-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 15px; font-weight: 700;
-    color: var(--bear); display: block; margin-bottom: 2px;
-  }
-
-  .pos-lbl {
-    font-size: 8px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: .5px;
-  }
-
-  /* Disclaimer */
-  .disclaimer {
-    margin-top: 32px; padding: 13px 16px;
-    background: rgba(139,69,19,.04);
-    border: 1px solid rgba(139,69,19,.1);
-    border-radius: 8px; font-size: 10px; color: #5a4030;
-    font-family: 'Space Mono', monospace; line-height: 1.7;
-  }
+:root {
+  --bear: #D2691E; --bear-dark: #8B4513;
+  --bg: #080604; --surface: rgba(20,12,6,0.9);
+  --border: rgba(139,69,19,0.2); --text: #e8ddd0;
+  --muted: #7a5c40; --green: #00c878; --red: #e03050; --gold: #D2691E;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(139,69,19,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(139,69,19,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.bg-glow{position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:800px;height:600px;z-index:0;background:radial-gradient(ellipse,rgba(139,69,19,.06) 0%,transparent 70%);pointer-events:none}
+
+/* Layout */
+.page{position:relative;z-index:2;display:grid;grid-template-columns:1fr 300px;gap:0;min-height:100vh}
+.main-col{padding:20px 20px 80px;max-width:680px;width:100%}
+
+/* Sidebar */
+.sidebar{border-left:1px solid var(--border);background:rgba(12,7,3,0.95);padding:20px 16px;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.sidebar-title{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--bear);text-transform:uppercase;margin-bottom:4px;font-family:'Space Mono',monospace}
+.sidebar-sub{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:.5px}
+
+/* Amount selector */
+.amount-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.amt-btn{padding:8px 6px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
+.amt-btn:hover{border-color:rgba(210,105,30,.3);color:var(--bear)}
+.amt-btn.sel{background:rgba(139,69,19,.12);border-color:rgba(210,105,30,.5);color:var(--bear)}
+.amt-custom{grid-column:span 2;display:flex;align-items:center;gap:6px;background:rgba(139,69,19,.05);border:1px solid var(--border);border-radius:7px;padding:7px 10px}
+.amt-custom input{background:transparent;border:none;outline:none;color:var(--bear);font-family:'Space Mono',monospace;font-size:13px;font-weight:700;width:100%}
+.amt-custom span{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;flex-shrink:0}
+
+/* Steps */
+.steps-wrap{display:flex;flex-direction:column;gap:8px}
+.step{background:rgba(139,69,19,.05);border:1px solid rgba(139,69,19,.12);border-radius:8px;padding:10px 12px;position:relative}
+.step.active{border-color:rgba(210,105,30,.35);background:rgba(139,69,19,.1)}
+.step.done{border-color:rgba(0,200,120,.2);background:rgba(0,200,120,.04)}
+.step-num{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.step-circle{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;font-family:'Space Mono',monospace}
+.step-circle.pending{background:rgba(139,69,19,.15);border:1px solid var(--border);color:var(--muted)}
+.step-circle.active{background:linear-gradient(135deg,var(--bear-dark),var(--bear));color:#fff}
+.step-circle.done{background:rgba(0,200,120,.15);border:1px solid rgba(0,200,120,.3);color:var(--green)}
+.step-label{font-size:11px;font-weight:700;color:var(--text)}
+.step-label.muted{color:var(--muted)}
+.step-body{font-size:10px;color:#8b6a50;line-height:1.65;font-family:'Space Mono',monospace;padding-left:27px}
+.step-body strong{color:var(--bear);font-weight:700}
+.step-body a{color:var(--bear);text-decoration:none}
+.step-body a:hover{text-decoration:underline}
+
+/* Risk badge */
+.risk-box{border-radius:8px;padding:10px 12px}
+.risk-box.low{background:rgba(0,200,120,.06);border:1px solid rgba(0,200,120,.15)}
+.risk-box.med{background:rgba(210,105,30,.06);border:1px solid rgba(210,105,30,.2)}
+.risk-box.high{background:rgba(224,48,80,.06);border:1px solid rgba(224,48,80,.15)}
+.risk-title{font-size:10px;font-weight:700;letter-spacing:.5px;margin-bottom:6px;font-family:'Space Mono',monospace}
+.risk-box.low .risk-title{color:var(--green)}
+.risk-box.med .risk-title{color:var(--bear)}
+.risk-box.high .risk-title{color:var(--red)}
+.risk-item{font-size:9px;color:var(--muted);line-height:1.8;font-family:'Space Mono',monospace}
+
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:0 0 20px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--bear-dark),var(--bear));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 0 25px rgba(139,69,19,.3)}
+.logo-title{font-size:18px;font-weight:800;letter-spacing:2px;color:var(--bear);text-transform:uppercase}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Space Mono',monospace}
+.hright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:10px;font-family:'Space Mono',monospace;padding:4px 10px;border-radius:5px}
+.live-badge.live{background:rgba(0,200,120,.08);border:1px solid rgba(0,200,120,.2);color:var(--green)}
+.live-badge.demo{background:rgba(139,69,19,.08);border:1px solid var(--border);color:var(--muted)}
+.live-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.live-dot.on{background:var(--green);animation:pulse 1.5s infinite}
+.live-dot.off{background:var(--muted)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.stats{display:flex;gap:8px}
+.stat{background:rgba(139,69,19,.07);border:1px solid var(--border);border-radius:6px;padding:5px 12px;text-align:center}
+.stat-val{font-size:14px;font-weight:700;color:var(--bear);font-family:'Space Mono',monospace;display:block}
+.stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+
+/* Controls */
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.scan-btn{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--bear-dark),var(--bear));border:none;border-radius:9px;padding:10px 22px;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;flex-shrink:0}
+.scan-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 24px rgba(139,69,19,.4)}
+.scan-btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-dot{width:7px;height:7px;background:#fff;border-radius:50%;animation:pulse 1s infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+
+/* Progress */
+.prog{background:rgba(139,69,19,.06);border:1px solid var(--border);border-radius:9px;padding:13px 16px;margin-bottom:16px;display:none}
+.prog.show{display:block}
+.prog-top{display:flex;justify-content:space-between;margin-bottom:8px;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted)}
+.prog-track{height:3px;background:rgba(139,69,19,.12);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--bear-dark),var(--bear));border-radius:2px;transition:width .5s ease;width:0%}
+.prog-msg{margin-top:6px;font-size:10px;color:#4a3020;font-family:'Space Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Error */
+.err-box{background:rgba(224,48,80,.07);border:1px solid rgba(224,48,80,.2);border-radius:9px;padding:13px 16px;margin-bottom:14px;display:none;font-size:11px;color:var(--red);font-family:'Space Mono',monospace;line-height:1.7}
+.err-box.show{display:block}
+
+/* Filters */
+.filters{display:none;gap:5px;margin-bottom:16px;flex-wrap:wrap}
+.filters.show{display:flex}
+.filter-btn{padding:4px 12px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
+.filter-btn.active{background:rgba(139,69,19,.12);border-color:rgba(210,105,30,.4);color:var(--bear)}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:11px;margin-bottom:8px;overflow:hidden;transition:border-color .2s;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{border-color:rgba(139,69,19,.35)}
+.card.pos{border-left:3px solid var(--green)}
+.card.neg{border-left:3px solid var(--red)}
+.card.neu{border-left:3px solid var(--gold)}
+.card.skp{border-left:3px solid #3a2010;opacity:.6}
+.card.lc{border-left:3px solid rgba(139,69,19,.2)}
+.card.best-card{border:1px solid rgba(255,200,0,.35)!important;border-left:3px solid #ffd700!important;box-shadow:0 0 24px rgba(255,200,0,.07)}
+.card-main{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 14px;cursor:pointer;align-items:center}
+.best-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-family:'Space Mono',monospace;padding:2px 8px;border-radius:3px;background:linear-gradient(135deg,rgba(255,200,0,.15),rgba(255,160,0,.1));border:1px solid rgba(255,200,0,.35);color:#ffd700;font-weight:700;letter-spacing:.5px;margin-bottom:5px;width:fit-content}
+.card-cat{font-size:9px;font-family:'Space Mono',monospace;padding:1px 6px;border-radius:3px;background:rgba(139,69,19,.08);color:var(--muted);border:1px solid rgba(139,69,19,.15);text-transform:uppercase;letter-spacing:.5px;display:inline-block;margin-bottom:4px}
+.card-q{font-size:12px;font-weight:600;color:#c8b8a0;line-height:1.35;margin-bottom:5px}
+.card-meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.badge{font-family:'Space Mono',monospace;font-size:9px;padding:1px 6px;border-radius:3px;border:1px solid}
+.bvol{color:var(--muted);border-color:rgba(122,92,64,.3);background:rgba(122,92,64,.08)}
+.bbias{color:#c89040;border-color:rgba(200,144,64,.3);background:rgba(200,144,64,.06)}
+.bconf{color:#9b8fff;border-color:rgba(155,143,255,.3);background:rgba(155,143,255,.06)}
+.card-nums{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;min-width:90px}
+.edge-val{font-family:'Space Mono',monospace;font-size:17px;font-weight:700}
+.ep{color:var(--green)}.en{color:var(--red)}.ez{color:var(--gold)}
+.price-row{display:flex;gap:5px;align-items:center}
+.pm{font-family:'Space Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(122,92,64,.12);color:#8b7060;border:1px solid rgba(122,92,64,.2)}
+.pai{font-family:'Space Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700;color:#1a0a00}
+.pai.pp{background:var(--green)}.pai.pn{background:var(--red)}.pai.pz{background:var(--gold)}
+.dir-b{font-size:10px;font-weight:800;letter-spacing:1px;padding:3px 9px;border-radius:4px;font-family:'Space Mono',monospace;white-space:nowrap}
+.dy{background:rgba(0,200,120,.1);color:var(--green);border:1px solid rgba(0,200,120,.2)}
+.dn{background:rgba(224,48,80,.1);color:var(--red);border:1px solid rgba(224,48,80,.2)}
+.ds{background:rgba(60,32,16,.2);color:#4a3020;border:1px solid rgba(60,32,16,.3)}
+.skel{background:linear-gradient(90deg,rgba(139,69,19,.04) 0%,rgba(139,69,19,.1) 50%,rgba(139,69,19,.04) 100%);background-size:200% 100%;animation:shim 1.4s infinite;border-radius:3px;display:inline-block}
+@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.atag{font-size:9px;color:#3a2010;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:4px}
+.card-exp{padding:0 14px 13px;border-top:1px solid rgba(139,69,19,.1);padding-top:12px;display:none}
+.card-exp.open{display:block;animation:fadeIn .3s ease}
+.reasoning{background:rgba(0,0,0,.2);border:1px solid rgba(139,69,19,.1);border-radius:7px;padding:10px 12px;font-size:11px;color:#8b6a50;line-height:1.6;margin-bottom:10px}
+.poly-link{display:block;font-size:10px;color:var(--bear);font-family:'Space Mono',monospace;text-decoration:none;margin-bottom:10px}
+.poly-link:hover{text-decoration:underline}
+.pos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.pi{background:rgba(139,69,19,.05);border:1px solid rgba(139,69,19,.12);border-radius:6px;padding:9px;text-align:center}
+.piv{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--bear);display:block;margin-bottom:2px}
+.pil{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.disc{margin-top:28px;padding:12px 14px;background:rgba(139,69,19,.04);border:1px solid rgba(139,69,19,.1);border-radius:8px;font-size:10px;color:#5a4030;font-family:'Space Mono',monospace;line-height:1.7}
+.empty{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-ico{font-size:48px;margin-bottom:14px;opacity:.35;display:block}
+.empty-t{font-size:15px;font-weight:700;margin-bottom:6px;color:#6b5240}
+.empty-s{font-size:11px;font-family:'Space Mono',monospace;line-height:1.9;color:#4a3020}
+
+@media(max-width:700px){
+  .page{grid-template-columns:1fr}
+  .sidebar{position:fixed;right:-320px;top:0;height:100vh;width:300px;z-index:100;transition:right .3s ease;border-left:1px solid var(--border)}
+  .sidebar.open{right:0}
+  .sidebar-toggle{display:flex!important}
+}
+.sidebar-toggle{display:none;position:fixed;bottom:24px;right:20px;z-index:101;background:linear-gradient(135deg,var(--bear-dark),var(--bear));border:none;border-radius:50%;width:48px;height:48px;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(139,69,19,.4);align-items:center;justify-content:center}
+.sidebar-close{display:none;position:absolute;top:14px;right:14px;background:transparent;border:none;color:var(--muted);font-size:18px;cursor:pointer}
+@media(max-width:700px){.sidebar-close{display:block}}
 </style>
 </head>
 <body>
-
 <div class="bg-grid"></div>
 <div class="bg-glow"></div>
 
-<div class="wrap">
+<div class="page">
+<!-- ═══ MAIN ═══ -->
+<div class="main-col">
 
-  <!-- Header -->
   <header>
     <div class="logo">
       <div class="logo-icon">🐻</div>
@@ -432,198 +184,267 @@
         <div class="logo-sub">AI Alpha Scanner · Polymarket</div>
       </div>
     </div>
-    <div class="header-right">
+    <div class="hright">
       <div class="live-badge demo" id="live-badge">
         <div class="live-dot off" id="live-dot"></div>
         <span id="live-text">CONNECTING...</span>
       </div>
       <div class="stats">
-        <div class="stat">
-          <span class="stat-val" id="stat-markets">—</span>
-          <span class="stat-lbl">Markets</span>
-        </div>
-        <div class="stat">
-          <span class="stat-val" id="stat-edges" style="color:var(--green)">—</span>
-          <span class="stat-lbl">Edges</span>
-        </div>
-        <div class="stat">
-          <span class="stat-val" id="stat-avg">—%</span>
-          <span class="stat-lbl">Avg Edge</span>
-        </div>
+        <div class="stat"><span class="stat-val" id="stat-markets">—</span><span class="stat-lbl">Markets</span></div>
+        <div class="stat"><span class="stat-val" id="stat-edges" style="color:var(--green)">—</span><span class="stat-lbl">Edges</span></div>
+        <div class="stat"><span class="stat-val" id="stat-avg">—%</span><span class="stat-lbl">Avg Edge</span></div>
       </div>
     </div>
   </header>
 
-  <!-- Controls -->
   <div class="controls">
-    <div class="budget-box">
-      <span class="budget-label">$</span>
-      <input id="budget-input" type="number" value="100" min="10">
-      <span class="budget-label">bankroll</span>
-    </div>
     <button class="scan-btn" id="scan-btn" onclick="runScan()">
       <div class="btn-dot"></div>
       <span id="scan-label">SCAN MARKETS</span>
     </button>
   </div>
 
-  <!-- Progress -->
-  <div class="progress-wrap" id="progress-wrap">
-    <div class="progress-top">
-      <span>🐻 BROWNBEAR ANALYZING</span>
-      <span id="progress-pct">0%</span>
-    </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
-    <div class="progress-msg" id="progress-msg">Cargando mercados de Polymarket...</div>
+  <div class="prog" id="prog">
+    <div class="prog-top"><span>🐻 ANALIZANDO</span><span id="prog-pct">0%</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-msg" id="prog-msg">Conectando a Polymarket...</div>
   </div>
 
-  <!-- Error -->
-  <div class="error-box" id="error-box"></div>
+  <div class="err-box" id="err-box"></div>
 
-  <!-- Filters -->
   <div class="filters" id="filters">
-    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-    <button class="filter-btn" onclick="setFilter('edge', this)">Edge ≥12%</button>
-    <button class="filter-btn" onclick="setFilter('conf', this)">High Conf</button>
-    <button class="filter-btn" onclick="setFilter('yes', this)">Buy YES</button>
-    <button class="filter-btn" onclick="setFilter('no', this)">Buy NO</button>
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('edge',this)">Edge ≥12%</button>
+    <button class="filter-btn" onclick="setFilter('conf',this)">High Conf</button>
+    <button class="filter-btn" onclick="setFilter('yes',this)">Buy YES</button>
+    <button class="filter-btn" onclick="setFilter('no',this)">Buy NO</button>
   </div>
 
-  <!-- Markets -->
-  <div id="markets-wrap">
+  <div id="mwrap">
     <div class="empty">
-      <span class="empty-icon">🐻</span>
-      <div class="empty-title">Brownbear Oracle listo</div>
-      <div class="empty-sub">
-        Conectado a Polymarket en vivo<br>
-        Presiona SCAN para análisis real con Claude
+      <span class="empty-ico">🐻</span>
+      <div class="empty-t">Brownbear Oracle listo</div>
+      <div class="empty-s">Conectado a Polymarket en vivo<br>Presiona SCAN para análisis real con Claude</div>
+    </div>
+  </div>
+
+  <div class="disc" id="disc" style="display:none">
+    ⚠ Solo fines educativos. Mercados de predicción implican riesgo financiero real.
+    Verifica precios en polymarket.com antes de ejecutar. Nunca inviertas más de lo que puedes perder.
+  </div>
+</div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar" id="sidebar">
+  <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+
+  <div>
+    <div class="sidebar-title">🎯 Guía de Operación</div>
+    <div class="sidebar-sub">Elige cuánto quieres apostar</div>
+  </div>
+
+  <!-- Amount selector -->
+  <div>
+    <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:8px;letter-spacing:.5px">MONTO POR POSICIÓN</div>
+    <div class="amount-grid">
+      <button class="amt-btn" onclick="selectAmt(5,this)">$5</button>
+      <button class="amt-btn" onclick="selectAmt(10,this)">$10</button>
+      <button class="amt-btn sel" onclick="selectAmt(15,this)">$15</button>
+      <button class="amt-btn" onclick="selectAmt(20,this)">$20</button>
+      <div class="amt-custom">
+        <span>$</span>
+        <input type="number" id="custom-amt" placeholder="otro..." min="1" max="100" onchange="selectAmt(this.value,null)">
       </div>
     </div>
   </div>
 
-  <div class="disclaimer" id="disclaimer" style="display:none">
-    ⚠ Solo fines educativos. Los mercados de predicción implican riesgo financiero real.
-    Verifica todos los precios en polymarket.com antes de ejecutar cualquier posición.
-    Nunca inviertas más de lo que puedes perder.
+  <!-- Steps -->
+  <div>
+    <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:10px;letter-spacing:.5px">PASOS A SEGUIR</div>
+    <div class="steps-wrap" id="steps-wrap">
+      <!-- Rendered by JS -->
+    </div>
   </div>
 
+  <!-- Risk profile -->
+  <div id="risk-box-wrap"></div>
+
+</div>
 </div>
 
+<!-- Mobile toggle -->
+<button class="sidebar-toggle" onclick="toggleSidebar()">📋</button>
+
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
 const BACKEND = 'https://brownbear-backend-production.up.railway.app';
+let allMarkets = [], currentFilter = 'all', scanning = false;
+let selectedAmt = 15;
 
-// ─── State ────────────────────────────────────────────────────────────────────
-let allMarkets = [];
-let currentFilter = 'all';
-let scanning = false;
-
-// ─── Init: check backend health ───────────────────────────────────────────────
+// ── Health ──────────────────────────────────────────────────────────────────
 async function checkHealth() {
   try {
-    const res = await fetch(`${BACKEND}/`);
-    const data = await res.json();
-    if (data.status === 'ok') {
-      setBadge(true);
-    }
-  } catch(e) {
-    setBadge(false);
-  }
+    const r = await fetch(`${BACKEND}/health`);
+    const d = await r.json();
+    if (d.status === 'ok') setBadge(true);
+  } catch { setBadge(false); }
 }
 
 function setBadge(live) {
-  const badge = document.getElementById('live-badge');
-  const dot = document.getElementById('live-dot');
-  const text = document.getElementById('live-text');
-  if (live) {
-    badge.className = 'live-badge live';
-    dot.className = 'live-dot on';
-    text.textContent = 'LIVE DATA';
-  } else {
-    badge.className = 'live-badge demo';
-    dot.className = 'live-dot off';
-    text.textContent = 'OFFLINE';
-  }
+  const b = document.getElementById('live-badge');
+  const d = document.getElementById('live-dot');
+  const t = document.getElementById('live-text');
+  b.className = live ? 'live-badge live' : 'live-badge demo';
+  d.className = live ? 'live-dot on' : 'live-dot off';
+  t.textContent = live ? 'LIVE DATA' : 'OFFLINE';
 }
 
-// ─── Main scan ────────────────────────────────────────────────────────────────
+// ── Sidebar ──────────────────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function selectAmt(val, btn) {
+  selectedAmt = parseFloat(val) || 15;
+  document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('sel'));
+  if (btn) btn.classList.add('sel');
+  renderGuide();
+}
+
+function renderGuide() {
+  const amt = selectedAmt;
+  const budget = 100; // default
+  const maxPos = Math.floor(budget / amt);
+
+  const steps = [
+    {
+      icon: '1',
+      label: 'Escanea los mercados',
+      body: `Presiona <strong>SCAN MARKETS</strong> arriba. Claude analiza ~8 mercados activos de Polymarket en vivo y calcula el edge de cada uno.`
+    },
+    {
+      icon: '2',
+      label: 'Filtra por Edge ≥12%',
+      body: `Click en <strong>"Edge ≥12%"</strong> y <strong>"High Conf"</strong>. Solo entra en mercados con esos dos criterios. Si no hay ninguno — <strong>no operes hoy.</strong>`
+    },
+    {
+      icon: '3',
+      label: `Elige la 💫 Mejor Oportunidad`,
+      body: `La tarjeta con <strong>💫 MEJOR OPORTUNIDAD</strong> es la que tiene mayor edge + confianza + volumen. Haz click en ella para ver el análisis completo.`
+    },
+    {
+      icon: '4',
+      label: 'Verifica en Polymarket',
+      body: `Click en <strong>"→ Ver en Polymarket ↗"</strong> dentro de la tarjeta. Verifica que el precio actual es similar al que muestra el Oracle. Si hay diferencia >10%, recalcula.`
+    },
+    {
+      icon: '5',
+      label: `Apuesta $${amt} USDC`,
+      body: `En Polymarket, click en <strong>Buy YES</strong> o <strong>Buy NO</strong> según la recomendación. Ingresa <strong>$${amt} USDC</strong>. Confirma con tu wallet (Phantom o MetaMask).`
+    },
+    {
+      icon: '6',
+      label: 'Espera al cierre',
+      body: `El mercado cierra en la fecha indicada. Si aciertas, recibes el pago en USDC automáticamente. Puedes vender tu posición antes del cierre en el mercado secundario.`
+    }
+  ];
+
+  const html = steps.map((s, i) => `
+    <div class="step">
+      <div class="step-num">
+        <div class="step-circle pending">${s.icon}</div>
+        <div class="step-label">${s.label}</div>
+      </div>
+      <div class="step-body">${s.body}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('steps-wrap').innerHTML = html;
+
+  // Risk profile
+  let riskClass, riskTitle, riskItems;
+  if (amt <= 5) {
+    riskClass = 'low'; riskTitle = '🟢 RIESGO BAJO';
+    riskItems = [
+      `Apuesta: $${amt} por posición`,
+      `Máx posiciones: ${maxPos} simultáneas`,
+      `Pérdida máx posible: $${amt}`,
+      `Perfecto para aprender`,
+      `Ideal para primeros 10 trades`
+    ];
+  } else if (amt <= 15) {
+    riskClass = 'med'; riskTitle = '🟡 RIESGO MODERADO';
+    riskItems = [
+      `Apuesta: $${amt} por posición`,
+      `Máx posiciones: ${maxPos} simultáneas`,
+      `Pérdida máx posible: $${(amt * Math.min(maxPos,3)).toFixed(0)}`,
+      `Solo con edge ≥12% + High Conf`,
+      `Máximo 3 posiciones activas`
+    ];
+  } else {
+    riskClass = 'high'; riskTitle = '🔴 RIESGO ALTO';
+    riskItems = [
+      `Apuesta: $${amt} por posición`,
+      `Máx posiciones: ${Math.min(maxPos,2)} simultáneas`,
+      `Pérdida máx posible: $${(amt * Math.min(maxPos,2)).toFixed(0)}`,
+      `Solo con edge ≥20% + High Conf`,
+      `⚠ Verifica precios manualmente`
+    ];
+  }
+
+  document.getElementById('risk-box-wrap').innerHTML = `
+    <div class="risk-box ${riskClass}">
+      <div class="risk-title">${riskTitle}</div>
+      ${riskItems.map(i => `<div class="risk-item">· ${i}</div>`).join('')}
+    </div>`;
+}
+
+// ── Scan ─────────────────────────────────────────────────────────────────────
 async function runScan() {
   if (scanning) return;
-  scanning = true;
-  allMarkets = [];
-  currentFilter = 'all';
-
-  // Reset UI
+  scanning = true; allMarkets = []; currentFilter = 'all';
   document.getElementById('scan-btn').disabled = true;
   document.getElementById('scan-label').textContent = 'SCANNING...';
-  document.getElementById('progress-wrap').classList.add('show');
-  document.getElementById('error-box').classList.remove('show');
+  document.getElementById('prog').classList.add('show');
+  document.getElementById('err-box').classList.remove('show');
   document.getElementById('filters').classList.remove('show');
-  document.getElementById('disclaimer').style.display = 'none';
-  document.getElementById('markets-wrap').innerHTML = '';
-  setProgress(5, 'Conectando a Polymarket...');
+  document.getElementById('disc').style.display = 'none';
+  document.getElementById('mwrap').innerHTML = '';
+  setP(5, 'Conectando a Polymarket...');
 
   try {
-    // 1. Fetch markets
-    const mRes = await fetch(`${BACKEND}/markets?limit=8`);
-    if (!mRes.ok) throw new Error(`Markets error: ${mRes.status}`);
-    const mData = await mRes.json();
-    if (!mData.success) throw new Error(mData.error);
-
-    const markets = mData.markets;
-    setProgress(15, `${markets.length} mercados encontrados. Analizando con Claude...`);
+    const mr = await fetch(`${BACKEND}/markets?limit=12`);
+    if (!mr.ok) throw new Error(`Markets error: ${mr.status}`);
+    const md = await mr.json();
+    if (!md.success) throw new Error(md.error);
+    const markets = md.markets;
+    setP(15, `${markets.length} mercados encontrados. Analizando...`);
     document.getElementById('stat-markets').textContent = markets.length;
     document.getElementById('filters').classList.add('show');
-
-    // Render skeleton cards
     markets.forEach(m => renderCard(m, null, true));
 
-    // 2. Analyze each market
     for (let i = 0; i < markets.length; i++) {
       const m = markets[i];
-      setProgress(
-        15 + Math.round(((i) / markets.length) * 82),
-        `→ ${m.question.slice(0, 60)}...`
-      );
-
+      setP(15 + Math.round((i / markets.length) * 82), `→ ${m.question.slice(0,55)}...`);
       try {
-        const aRes = await fetch(`${BACKEND}/analyze`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const ar = await fetch(`${BACKEND}/analyze`, {
+          method: 'POST', headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ market: m })
         });
-        const aData = await aRes.json();
-        if (aData.success) {
-          allMarkets.push({ ...m, analysis: aData.analysis });
-          updateCard(m.id, m, aData.analysis);
-        } else {
-          allMarkets.push({ ...m, analysis: null });
-        }
-      } catch(e) {
-        allMarkets.push({ ...m, analysis: null });
-      }
-
-      setProgress(
-        15 + Math.round(((i + 1) / markets.length) * 82),
-        `✓ ${i + 1}/${markets.length} analizados`
-      );
+        const ad = await ar.json();
+        allMarkets.push({ ...m, analysis: ad.success ? ad.analysis : null });
+      } catch { allMarkets.push({ ...m, analysis: null }); }
+      setP(15 + Math.round(((i+1) / markets.length) * 82), `✓ ${i+1}/${markets.length} analizados`);
       updateStats();
+      rerenderAll();
     }
 
-    setProgress(100, '✓ Scan completo');
-    setTimeout(() => {
-      document.getElementById('progress-wrap').classList.remove('show');
-    }, 1500);
-
-    document.getElementById('disclaimer').style.display = 'block';
-
+    setP(100, '✓ Scan completo');
+    setTimeout(() => document.getElementById('prog').classList.remove('show'), 1500);
+    document.getElementById('disc').style.display = 'block';
   } catch(e) {
-    const box = document.getElementById('error-box');
-    box.textContent = '⚠ ' + e.message;
-    box.classList.add('show');
-    document.getElementById('progress-wrap').classList.remove('show');
+    const b = document.getElementById('err-box');
+    b.textContent = '⚠ ' + e.message; b.classList.add('show');
+    document.getElementById('prog').classList.remove('show');
   }
 
   document.getElementById('scan-btn').disabled = false;
@@ -631,151 +452,159 @@ async function runScan() {
   scanning = false;
 }
 
-// ─── Progress ─────────────────────────────────────────────────────────────────
-function setProgress(pct, msg) {
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-pct').textContent = pct + '%';
-  if (msg) document.getElementById('progress-msg').textContent = msg;
+function setP(pct, msg) {
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  if (msg) document.getElementById('prog-msg').textContent = msg;
 }
 
-// ─── Stats ────────────────────────────────────────────────────────────────────
 function updateStats() {
-  const analyzed = allMarkets.filter(m => m.analysis);
-  const edges = analyzed.filter(m => m.analysis.betDirection !== 'SKIP' && Math.abs(m.analysis.edge || 0) >= 10);
-  const avg = analyzed.length
-    ? (analyzed.reduce((s, m) => s + Math.abs(m.analysis?.edge || 0), 0) / analyzed.length).toFixed(1)
-    : '—';
-
-  document.getElementById('stat-edges').textContent = edges.length || '—';
+  const a = allMarkets.filter(m => m.analysis);
+  const e = a.filter(m => m.analysis.betDirection !== 'SKIP' && Math.abs(m.analysis.edge||0) >= 10);
+  const avg = a.length ? (a.reduce((s,m) => s+Math.abs(m.analysis?.edge||0),0)/a.length).toFixed(1) : '—';
+  document.getElementById('stat-edges').textContent = e.length || '—';
   document.getElementById('stat-avg').textContent = avg + '%';
 }
 
-// ─── Filter ───────────────────────────────────────────────────────────────────
+// ── Scoring & Best ────────────────────────────────────────────────────────────
+function score(m) {
+  const a = m.analysis;
+  if (!a || a.betDirection === 'SKIP') return 0;
+  const e = Math.abs(a.edge||0);
+  const c = a.confidence === 'high' ? 20 : a.confidence === 'medium' ? 10 : 0;
+  const v = m.volume > 500000 ? 15 : m.volume > 100000 ? 8 : m.volume > 10000 ? 3 : 0;
+  return e + c + v;
+}
+
+function bestId() {
+  const a = allMarkets.filter(m => m.analysis && m.analysis.betDirection !== 'SKIP');
+  if (!a.length) return null;
+  return a.reduce((b,m) => score(m) > score(b) ? m : b).id;
+}
+
+// ── Filter ────────────────────────────────────────────────────────────────────
 function setFilter(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderAll();
+  rerenderAll();
 }
 
-function passesFilter(m) {
+function passes(m) {
   const a = m.analysis;
   if (currentFilter === 'all') return true;
   if (!a) return false;
-  if (currentFilter === 'edge') return Math.abs(a.edge || 0) >= 12;
+  if (currentFilter === 'edge') return Math.abs(a.edge||0) >= 12;
   if (currentFilter === 'conf') return a.confidence === 'high';
   if (currentFilter === 'yes') return a.betDirection === 'YES';
   if (currentFilter === 'no') return a.betDirection === 'NO';
   return true;
 }
 
-function renderAll() {
-  const wrap = document.getElementById('markets-wrap');
-  wrap.innerHTML = '';
-  allMarkets.filter(passesFilter).forEach(m => renderCard(m, m.analysis, false));
-}
-
-// ─── Card rendering ───────────────────────────────────────────────────────────
-function cardClass(a) {
-  if (!a) return 'loading-card';
+// ── Render ────────────────────────────────────────────────────────────────────
+function cardCls(a) {
+  if (!a) return 'lc';
   if (a.betDirection === 'SKIP') return 'skp';
-  if (Math.abs(a.edge || 0) < 5) return 'neu';
+  if (Math.abs(a.edge||0) < 5) return 'neu';
   return a.edge > 0 ? 'pos' : 'neg';
 }
 
-function renderCard(market, analysis, isSkeleton) {
-  const wrap = document.getElementById('markets-wrap');
+function rerenderAll() {
+  const wrap = document.getElementById('mwrap');
+  wrap.innerHTML = '';
+  const bid = bestId();
+  const sorted = [...allMarkets]
+    .filter(passes)
+    .sort((a,b) => score(b) - score(a));
+  sorted.forEach(m => {
+    const div = document.createElement('div');
+    const isBest = m.id === bid;
+    div.className = `card ${cardCls(m.analysis)}${isBest ? ' best-card' : ''}`;
+    div.id = `card-${m.id}`;
+    div.innerHTML = buildHTML(m, m.analysis, false, isBest);
+    wrap.appendChild(div);
+  });
+}
+
+function renderCard(m, a, isSkel) {
+  const wrap = document.getElementById('mwrap');
   const div = document.createElement('div');
-  div.className = `card ${cardClass(analysis)}`;
-  div.id = `card-${market.id}`;
-  div.innerHTML = buildCardHTML(market, analysis, isSkeleton);
+  div.className = `card lc`;
+  div.id = `card-${m.id}`;
+  div.innerHTML = buildHTML(m, a, isSkel, false);
   wrap.appendChild(div);
 }
 
-function updateCard(id, market, analysis) {
-  const div = document.getElementById(`card-${id}`);
-  if (div) {
-    div.className = `card ${cardClass(analysis)}`;
-    div.innerHTML = buildCardHTML(market, analysis, false);
-  }
-}
-
-function buildCardHTML(m, a, isSkeleton) {
+function buildHTML(m, a, isSkel, isBest) {
   const yp = m.yesPrice || 0.5;
-  const budget = parseFloat(document.getElementById('budget-input').value) || 100;
-
+  const budget = selectedAmt;
   let numsHTML = '';
-  if (isSkeleton || !a) {
-    numsHTML = `
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
-        <div class="skel" style="width:70px;height:18px"></div>
-        <div class="skel" style="width:80px;height:12px"></div>
-        <div class="analyzing-tag"><span class="spin">⟳</span> analyzing</div>
-      </div>`;
+  if (isSkel || !a) {
+    numsHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+      <div class="skel" style="width:65px;height:17px"></div>
+      <div class="skel" style="width:75px;height:11px"></div>
+      <div class="atag"><span class="spin">⟳</span> analyzing</div>
+    </div>`;
   } else {
-    const edgeCls = a.edge > 0 ? 'edge-pos' : a.edge < -5 ? 'edge-neg' : 'edge-neu';
-    const aiCls = a.edge > 0 ? 'pp' : a.edge < -5 ? 'pn' : 'pz';
-    const dirCls = a.betDirection === 'YES' ? 'dir-yes' : a.betDirection === 'NO' ? 'dir-no' : 'dir-skip';
-    const dirTxt = a.betDirection === 'YES' ? '▲ BUY YES' : a.betDirection === 'NO' ? '▼ BUY NO' : '— SKIP';
-    numsHTML = `
-      <div class="card-nums">
-        <span class="edge-val ${edgeCls}">${a.edge > 0 ? '+' : ''}${(a.edge||0).toFixed(1)}%</span>
-        <div class="price-row">
-          <span class="price-mkt">MKT ${(yp*100).toFixed(0)}%</span>
-          <span class="price-ai ${aiCls}">AI ${a.trueProbability}%</span>
-        </div>
-        <span class="dir-badge ${dirCls}">${dirTxt}</span>
-      </div>`;
-  }
-
-  let expandedHTML = '';
-  if (a) {
-    const dollarAlloc = ((a.allocatePct || 0) / 100 * budget).toFixed(2);
-    const potRet = a.betDirection !== 'SKIP'
-      ? a.betDirection === 'YES'
-        ? (parseFloat(dollarAlloc) / yp * (1 - yp)).toFixed(2)
-        : (parseFloat(dollarAlloc) / (1 - yp) * yp).toFixed(2)
-      : '0';
-
-    expandedHTML = `
-      <div class="card-expanded" id="exp-${m.id}">
-        <div class="reasoning">🐻 ${a.reasoning}</div>
-        ${m.url ? `<a class="poly-link" href="${m.url}" target="_blank">→ Ver en Polymarket ↗</a>` : ''}
-        <div class="pos-grid">
-          <div class="pos-item"><span class="pos-val">$${dollarAlloc}</span><span class="pos-lbl">Bet Size</span></div>
-          <div class="pos-item"><span class="pos-val">${a.allocatePct}%</span><span class="pos-lbl">Bankroll</span></div>
-          <div class="pos-item"><span class="pos-val" style="color:var(--green)">+$${potRet}</span><span class="pos-lbl">Win Est.</span></div>
-        </div>
-      </div>`;
-  }
-
-  const biasBadge = a && a.biasDetected && !['none','None','NONE'].includes(a.biasDetected)
-    ? `<span class="badge badge-bias">⚠ ${a.biasDetected}</span>` : '';
-  const confBadge = a
-    ? `<span class="badge badge-conf">${a.confidence === 'high' ? '●' : a.confidence === 'medium' ? '◑' : '○'} ${a.confidence}</span>` : '';
-
-  return `
-    <div class="card-main" onclick="toggleCard('${m.id}')">
-      <div>
-        <span class="card-cat">${m.category}</span>
-        <div class="card-q">${m.question}</div>
-        <div class="card-meta">
-          <span class="badge badge-vol">VOL $${(m.volume/1e6).toFixed(1)}M</span>
-          ${biasBadge}${confBadge}
-        </div>
+    const ec = a.edge > 0 ? 'ep' : a.edge < -5 ? 'en' : 'ez';
+    const ac = a.edge > 0 ? 'pp' : a.edge < -5 ? 'pn' : 'pz';
+    const dc = a.betDirection==='YES' ? 'dy' : a.betDirection==='NO' ? 'dn' : 'ds';
+    const dt = a.betDirection==='YES' ? '▲ BUY YES' : a.betDirection==='NO' ? '▼ BUY NO' : '— SKIP';
+    numsHTML = `<div class="card-nums">
+      <span class="edge-val ${ec}">${a.edge>0?'+':''}${(a.edge||0).toFixed(1)}%</span>
+      <div class="price-row">
+        <span class="pm">MKT ${(yp*100).toFixed(0)}%</span>
+        <span class="pai ${ac}">AI ${a.trueProbability}%</span>
       </div>
-      ${numsHTML}
+      <span class="dir-b ${dc}">${dt}</span>
+    </div>`;
+  }
+
+  let expHTML = '';
+  if (a) {
+    const da = ((a.allocatePct||0)/100 * budget).toFixed(2);
+    const pr = a.betDirection !== 'SKIP'
+      ? a.betDirection === 'YES'
+        ? (parseFloat(da)/yp*(1-yp)).toFixed(2)
+        : (parseFloat(da)/(1-yp)*yp).toFixed(2)
+      : '0';
+    expHTML = `<div class="card-exp" id="exp-${m.id}">
+      <div class="reasoning">🐻 ${a.reasoning}</div>
+      ${m.url ? `<a class="poly-link" href="${m.url}" target="_blank">→ Ver en Polymarket ↗</a>` : ''}
+      <div class="pos-grid">
+        <div class="pi"><span class="piv">$${da}</span><span class="pil">Apuesta</span></div>
+        <div class="pi"><span class="piv">${a.allocatePct}%</span><span class="pil">Bankroll</span></div>
+        <div class="pi"><span class="piv" style="color:var(--green)">+$${pr}</span><span class="pil">Si ganas</span></div>
+      </div>
+    </div>`;
+  }
+
+  const bb = a && a.biasDetected && !['none','None','NONE'].includes(a.biasDetected)
+    ? `<span class="badge bbias">⚠ ${a.biasDetected}</span>` : '';
+  const cb = a ? `<span class="badge bconf">${a.confidence==='high'?'●':a.confidence==='medium'?'◑':'○'} ${a.confidence}</span>` : '';
+
+  return `<div class="card-main" onclick="toggleCard('${m.id}')">
+    <div>
+      ${isBest ? `<div class="best-badge">💫 MEJOR OPORTUNIDAD</div>` : ''}
+      <span class="card-cat">${m.category}</span>
+      <div class="card-q">${m.question}</div>
+      <div class="card-meta">
+        <span class="badge bvol">VOL $${(m.volume/1e6).toFixed(2)}M</span>
+        ${bb}${cb}
+      </div>
     </div>
-    ${expandedHTML}`;
+    ${numsHTML}
+  </div>${expHTML}`;
 }
 
 function toggleCard(id) {
-  const exp = document.getElementById(`exp-${id}`);
-  if (exp) exp.classList.toggle('open');
+  const e = document.getElementById(`exp-${id}`);
+  if (e) e.classList.toggle('open');
 }
 
-// ─── Boot ─────────────────────────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────────────────────
 checkHealth();
+renderGuide();
 </script>
 </body>
 </html>
