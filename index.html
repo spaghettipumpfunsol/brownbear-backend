@@ -3,599 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brownbear Oracle</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Brown Bear</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
 <style>
-:root{--bear:#D2691E;--bear-dark:#8B4513;--bg:#080604;--surface:rgba(20,12,6,.9);--border:rgba(139,69,19,.2);--text:#e8ddd0;--muted:#7a5c40;--green:#00c878;--red:#e03050;--gold:#D2691E}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
-.bg-grid{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(139,69,19,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(139,69,19,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
-.bg-glow{position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:800px;height:600px;z-index:0;background:radial-gradient(ellipse,rgba(139,69,19,.06) 0%,transparent 70%);pointer-events:none}
-.page{position:relative;z-index:2;display:grid;grid-template-columns:1fr 290px;min-height:100vh}
-.main-col{padding:20px 20px 80px;min-width:0}
-.sidebar{border-left:1px solid var(--border);background:rgba(10,6,2,.96);padding:18px 14px;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-/* Header */
-header{display:flex;align-items:center;justify-content:space-between;padding:0 0 18px;border-bottom:1px solid var(--border);margin-bottom:18px;flex-wrap:wrap;gap:10px}
-.logo{display:flex;align-items:center;gap:11px}
-.logo-icon{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--bear-dark),var(--bear));display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0;box-shadow:0 0 25px rgba(139,69,19,.3)}
-.logo-title{font-size:17px;font-weight:800;letter-spacing:2px;color:var(--bear);text-transform:uppercase}
-.logo-sub{font-size:9px;color:var(--muted);letter-spacing:1px;font-family:'Space Mono',monospace}
-.hright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.live-badge{display:flex;align-items:center;gap:5px;font-size:9px;font-family:'Space Mono',monospace;padding:3px 9px;border-radius:4px}
-.live-badge.live{background:rgba(0,200,120,.08);border:1px solid rgba(0,200,120,.2);color:var(--green)}
-.live-badge.demo{background:rgba(139,69,19,.08);border:1px solid var(--border);color:var(--muted)}
-.live-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.live-dot.on{background:var(--green);animation:pulse 1.5s infinite}
-.live-dot.off{background:var(--muted)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.stats{display:flex;gap:7px}
-.stat{background:rgba(139,69,19,.07);border:1px solid var(--border);border-radius:6px;padding:4px 10px;text-align:center}
-.stat-val{font-size:13px;font-weight:700;color:var(--bear);font-family:'Space Mono',monospace;display:block}
-.stat-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    overflow: hidden;
+  }
 
-/* Controls */
-.ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.scan-btn{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--bear-dark),var(--bear));border:none;border-radius:8px;padding:9px 20px;color:#fff;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;flex-shrink:0}
-.scan-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 5px 20px rgba(139,69,19,.4)}
-.scan-btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-dot{width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 1s infinite}
-@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.spin{display:inline-block;animation:spin 1s linear infinite}
+  .page {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #000000;
+    position: relative;
+  }
 
-/* Filter bar */
-.filter-bar{display:none;gap:5px;margin-bottom:12px;flex-wrap:wrap}
-.filter-bar.show{display:flex}
-.fb{padding:4px 11px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s}
-.fb.on{background:rgba(139,69,19,.12);border-color:rgba(210,105,30,.4);color:var(--bear)}
-.fb.trending-on{background:rgba(255,100,0,.1);border-color:rgba(255,100,0,.3);color:#ff7040}
+  .bear-img {
+    width: 340px;
+    max-width: 75vw;
+    opacity: 0;
+    animation: fadeIn 1.2s ease 0.3s forwards;
+  }
 
-/* Vol slider */
-.vol-row{display:none;align-items:center;gap:8px;margin-bottom:12px;background:rgba(139,69,19,.05);border:1px solid var(--border);border-radius:7px;padding:8px 12px}
-.vol-row.show{display:flex}
-.vol-label{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;white-space:nowrap}
-.vol-slider{flex:1;accent-color:var(--bear);cursor:pointer}
-.vol-val{font-size:10px;font-weight:700;color:var(--bear);font-family:'Space Mono',monospace;white-space:nowrap;min-width:50px;text-align:right}
+  .brand {
+    margin-top: 28px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 14px;
+    color: #ffffff;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeIn 1s ease 0.8s forwards;
+  }
 
-/* Progress */
-.prog{background:rgba(139,69,19,.06);border:1px solid var(--border);border-radius:9px;padding:12px 15px;margin-bottom:14px;display:none}
-.prog.show{display:block}
-.prog-top{display:flex;justify-content:space-between;margin-bottom:7px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted)}
-.prog-track{height:3px;background:rgba(139,69,19,.12);border-radius:2px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--bear-dark),var(--bear));border-radius:2px;transition:width .5s ease;width:0%}
-.prog-msg{margin-top:5px;font-size:9px;color:#4a3020;font-family:'Space Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .enter-btn {
+    margin-top: 52px;
+    padding: 14px 52px;
+    border: 1.5px solid #ffffff;
+    border-radius: 40px;
+    background: transparent;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.2s forwards;
+    transition: background 0.25s, color 0.25s;
+  }
 
-/* Error */
-.err{background:rgba(224,48,80,.07);border:1px solid rgba(224,48,80,.2);border-radius:8px;padding:12px 14px;margin-bottom:12px;display:none;font-size:10px;color:var(--red);font-family:'Space Mono',monospace;line-height:1.7}
-.err.show{display:block}
+  .enter-btn:hover {
+    background: #ffffff;
+    color: #000000;
+  }
 
-/* Cards */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:border-color .2s;animation:fi .4s ease}
-@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.card:hover{border-color:rgba(139,69,19,.3)}
-.card.pos{border-left:3px solid var(--green)}
-.card.neg{border-left:3px solid var(--red)}
-.card.neu{border-left:3px solid var(--gold)}
-.card.skp{border-left:3px solid #3a2010;opacity:.55}
-.card.lc{border-left:3px solid rgba(139,69,19,.15)}
-.card.best-card{border:1px solid rgba(255,200,0,.4)!important;border-left:3px solid #ffd700!important;box-shadow:0 0 20px rgba(255,200,0,.07)}
-.cm{display:grid;grid-template-columns:1fr auto;gap:9px;padding:11px 13px;cursor:pointer;align-items:center}
-.best-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:'Space Mono',monospace;padding:1px 7px;border-radius:3px;background:linear-gradient(135deg,rgba(255,200,0,.15),rgba(255,160,0,.1));border:1px solid rgba(255,200,0,.35);color:#ffd700;font-weight:700;margin-bottom:4px;width:fit-content}
-.trend-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:'Space Mono',monospace;padding:1px 7px;border-radius:3px;background:rgba(255,100,0,.08);border:1px solid rgba(255,100,0,.2);color:#ff7040;margin-bottom:4px;margin-left:4px;width:fit-content}
-.card-cat{font-size:8px;font-family:'Space Mono',monospace;padding:1px 5px;border-radius:3px;background:rgba(139,69,19,.08);color:var(--muted);border:1px solid rgba(139,69,19,.15);text-transform:uppercase;letter-spacing:.5px;display:inline-block;margin-bottom:4px}
-.card-q{font-size:12px;font-weight:600;color:#c8b8a0;line-height:1.3;margin-bottom:5px}
-.card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.badge{font-family:'Space Mono',monospace;font-size:8px;padding:1px 5px;border-radius:3px;border:1px solid}
-.bvol{color:var(--muted);border-color:rgba(122,92,64,.3);background:rgba(122,92,64,.08)}
-.bbias{color:#c89040;border-color:rgba(200,144,64,.3);background:rgba(200,144,64,.06)}
-.bconf{color:#9b8fff;border-color:rgba(155,143,255,.3);background:rgba(155,143,255,.06)}
-.cn{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;min-width:88px}
-.ev{font-family:'Space Mono',monospace;font-size:16px;font-weight:700}
-.ep{color:var(--green)}.en{color:var(--red)}.ez{color:var(--gold)}
-.pr{display:flex;gap:4px;align-items:center}
-.pm{font-family:'Space Mono',monospace;font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(122,92,64,.12);color:#8b7060;border:1px solid rgba(122,92,64,.2)}
-.pai{font-family:'Space Mono',monospace;font-size:8px;padding:1px 5px;border-radius:3px;font-weight:700;color:#1a0a00}
-.pai.pp{background:var(--green)}.pai.pn{background:var(--red)}.pai.pz{background:var(--gold)}
-.db{font-size:9px;font-weight:800;letter-spacing:.8px;padding:2px 8px;border-radius:4px;font-family:'Space Mono',monospace;white-space:nowrap}
-.dy{background:rgba(0,200,120,.1);color:var(--green);border:1px solid rgba(0,200,120,.2)}
-.dn{background:rgba(224,48,80,.1);color:var(--red);border:1px solid rgba(224,48,80,.2)}
-.ds{background:rgba(60,32,16,.2);color:#4a3020;border:1px solid rgba(60,32,16,.3)}
-.skel{background:linear-gradient(90deg,rgba(139,69,19,.04) 0%,rgba(139,69,19,.1) 50%,rgba(139,69,19,.04) 100%);background-size:200% 100%;animation:shim 1.4s infinite;border-radius:3px;display:inline-block}
-@keyframes shim{0%{background-position:-200% 0}100%{background-position:200% 0}}
-.atag{font-size:8px;color:#3a2010;font-family:'Space Mono',monospace;display:flex;align-items:center;gap:3px}
-.cexp{padding:0 13px 12px;border-top:1px solid rgba(139,69,19,.1);padding-top:11px;display:none}
-.cexp.open{display:block;animation:fi .3s ease}
-.reasoning{background:rgba(0,0,0,.2);border:1px solid rgba(139,69,19,.1);border-radius:7px;padding:9px 11px;font-size:10px;color:#8b6a50;line-height:1.6;margin-bottom:9px}
-.poly-link{display:block;font-size:9px;color:var(--bear);font-family:'Space Mono',monospace;text-decoration:none;margin-bottom:9px}
-.poly-link:hover{text-decoration:underline}
-.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.pi{background:rgba(139,69,19,.05);border:1px solid rgba(139,69,19,.12);border-radius:6px;padding:8px;text-align:center}
-.piv{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--bear);display:block;margin-bottom:1px}
-.pil{font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .footer {
+    position: absolute;
+    bottom: 36px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 5px;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.6s forwards;
+  }
 
-/* Portfolio panel */
-.port-panel{background:rgba(0,200,120,.04);border:1px solid rgba(0,200,120,.15);border-radius:10px;margin-bottom:8px;overflow:hidden;display:none}
-.port-panel.show{display:block;animation:fi .5s ease}
-.port-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(0,200,120,.1)}
-.port-title{font-size:12px;font-weight:800;color:var(--green);letter-spacing:1px;text-transform:uppercase}
-.port-sub{font-size:9px;color:#3a6a50;font-family:'Space Mono',monospace;margin-top:2px}
-.port-body{padding:12px 14px}
-.port-reasoning{font-size:10px;color:#4a7a60;font-family:'Space Mono',monospace;line-height:1.65;margin-bottom:12px;background:rgba(0,0,0,.2);border:1px solid rgba(0,200,120,.08);border-radius:6px;padding:9px 11px}
-.port-positions{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-.port-pos{background:rgba(0,200,120,.05);border:1px solid rgba(0,200,120,.12);border-radius:7px;padding:9px 11px}
-.port-pos-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.port-pos-q{font-size:10px;font-weight:600;color:#c8e8d0;flex:1;margin-right:8px;line-height:1.3}
-.port-pos-bet{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--green);flex-shrink:0}
-.port-pos-dir{font-size:8px;font-weight:800;padding:2px 7px;border-radius:3px;font-family:'Space Mono',monospace}
-.port-pos-why{font-size:9px;color:#4a7a60;font-family:'Space Mono',monospace;line-height:1.5}
-.port-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.port-sum-item{background:rgba(0,200,120,.06);border:1px solid rgba(0,200,120,.1);border-radius:6px;padding:8px;text-align:center}
-.port-sum-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;display:block;margin-bottom:2px}
-.port-sum-lbl{font-size:7px;color:#3a6a50;text-transform:uppercase;letter-spacing:.5px}
-.port-btn{display:flex;align-items:center;gap:6px;background:rgba(0,200,120,.1);border:1px solid rgba(0,200,120,.25);border-radius:7px;padding:8px 14px;color:var(--green);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;width:100%;justify-content:center;margin-top:10px}
-.port-btn:hover:not(:disabled){background:rgba(0,200,120,.15);transform:translateY(-1px)}
-.port-btn:disabled{opacity:.5;cursor:not-allowed}
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-.empty{text-align:center;padding:50px 20px;color:var(--muted)}
-.empty-ico{font-size:44px;margin-bottom:12px;opacity:.35;display:block}
-.empty-t{font-size:14px;font-weight:700;margin-bottom:5px;color:#6b5240}
-.empty-s{font-size:10px;font-family:'Space Mono',monospace;line-height:1.9;color:#4a3020}
-.disc{margin-top:24px;padding:11px 14px;background:rgba(139,69,19,.04);border:1px solid rgba(139,69,19,.1);border-radius:7px;font-size:9px;color:#5a4030;font-family:'Space Mono',monospace;line-height:1.7}
-
-/* Sidebar */
-.sb-title{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--bear);text-transform:uppercase;font-family:'Space Mono',monospace}
-.sb-sub{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px}
-.amt-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
-.amt-btn{padding:7px 4px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center}
-.amt-btn:hover{border-color:rgba(210,105,30,.3);color:var(--bear)}
-.amt-btn.sel{background:rgba(139,69,19,.12);border-color:rgba(210,105,30,.5);color:var(--bear)}
-.amt-custom{grid-column:span 2;display:flex;align-items:center;gap:5px;background:rgba(139,69,19,.05);border:1px solid var(--border);border-radius:6px;padding:6px 9px}
-.amt-custom input{background:transparent;border:none;outline:none;color:var(--bear);font-family:'Space Mono',monospace;font-size:12px;font-weight:700;width:100%}
-.amt-custom span{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;flex-shrink:0}
-.steps{display:flex;flex-direction:column;gap:7px}
-.step{background:rgba(139,69,19,.05);border:1px solid rgba(139,69,19,.1);border-radius:7px;padding:9px 10px}
-.step-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:4px}
-.step-n{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0;font-family:'Space Mono',monospace;background:rgba(139,69,19,.15);border:1px solid var(--border);color:var(--muted);margin-top:1px}
-.step-lbl{font-size:10px;font-weight:700;color:var(--text)}
-.step-body{font-size:9px;color:#8b6a50;line-height:1.6;font-family:'Space Mono',monospace;padding-left:24px}
-.step-body strong{color:var(--bear)}
-.risk-box{border-radius:7px;padding:9px 10px}
-.risk-box.low{background:rgba(0,200,120,.06);border:1px solid rgba(0,200,120,.15)}
-.risk-box.med{background:rgba(210,105,30,.06);border:1px solid rgba(210,105,30,.2)}
-.risk-box.hi{background:rgba(224,48,80,.06);border:1px solid rgba(224,48,80,.15)}
-.risk-t{font-size:9px;font-weight:700;letter-spacing:.5px;margin-bottom:5px;font-family:'Space Mono',monospace}
-.risk-box.low .risk-t{color:var(--green)}.risk-box.med .risk-t{color:var(--bear)}.risk-box.hi .risk-t{color:var(--red)}
-.risk-i{font-size:8px;color:var(--muted);line-height:1.8;font-family:'Space Mono',monospace}
-
-@media(max-width:680px){
-  .page{grid-template-columns:1fr}
-  .sidebar{position:fixed;right:-310px;top:0;height:100vh;width:290px;z-index:100;transition:right .3s ease}
-  .sidebar.open{right:0;box-shadow:-8px 0 30px rgba(0,0,0,.5)}
-  .sb-toggle{display:flex!important}
-  .sb-close{display:block!important}
-}
-.sb-toggle{display:none;position:fixed;bottom:22px;right:18px;z-index:101;background:linear-gradient(135deg,var(--bear-dark),var(--bear));border:none;border-radius:50%;width:46px;height:46px;font-size:19px;cursor:pointer;box-shadow:0 4px 18px rgba(139,69,19,.4);align-items:center;justify-content:center;color:#fff}
-.sb-close{display:none;background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;position:absolute;top:12px;right:12px}
+  @media (max-width: 480px) {
+    .bear-img { width: 260px; }
+    .brand { font-size: 17px; letter-spacing: 10px; }
+    .enter-btn { padding: 12px 40px; font-size: 11px; }
+  }
 </style>
 </head>
 <body>
-<div class="bg-grid"></div><div class="bg-glow"></div>
 <div class="page">
-
-<!-- ═══ MAIN ═══════════════════════════════════════════════════════════════ -->
-<div class="main-col">
-  <header>
-    <div class="logo">
-      <div class="logo-icon">🐻</div>
-      <div>
-        <div class="logo-title">Brownbear Oracle</div>
-        <div class="logo-sub">AI Portfolio Scanner · Polymarket</div>
-      </div>
-    </div>
-    <div class="hright">
-      <div class="live-badge demo" id="live-badge">
-        <div class="live-dot off" id="live-dot"></div>
-        <span id="live-text">CONNECTING...</span>
-      </div>
-      <div class="stats">
-        <div class="stat"><span class="stat-val" id="s-markets">—</span><span class="stat-lbl">Markets</span></div>
-        <div class="stat"><span class="stat-val" id="s-edges" style="color:var(--green)">—</span><span class="stat-lbl">Edges</span></div>
-        <div class="stat"><span class="stat-val" id="s-avg">—</span><span class="stat-lbl">Avg Edge</span></div>
-      </div>
-    </div>
-  </header>
-
-  <div class="ctrl-row">
-    <button class="scan-btn" id="scan-btn" onclick="runScan()">
-      <div class="btn-dot"></div><span id="scan-lbl">SCAN MARKETS</span>
-    </button>
-  </div>
-
-  <!-- Filter bar -->
-  <div class="filter-bar" id="fbar">
-    <button class="fb on" onclick="setFilter('all',this)">All</button>
-    <button class="fb" onclick="setFilter('edge',this)">Edge ≥12%</button>
-    <button class="fb" onclick="setFilter('conf',this)">High Conf</button>
-    <button class="fb" onclick="setFilter('yes',this)">Buy YES</button>
-    <button class="fb" onclick="setFilter('no',this)">Buy NO</button>
-    <button class="fb" id="trend-btn" onclick="toggleTrending(this)">🔥 Trending</button>
-  </div>
-
-  <!-- Vol24h slider -->
-  <div class="vol-row" id="vol-row">
-    <span class="vol-label">VOL 24H MIN</span>
-    <input type="range" class="vol-slider" id="vol-slider" min="0" max="5" step="1" value="0" oninput="updateVolFilter()">
-    <span class="vol-val" id="vol-val">All</span>
-  </div>
-
-  <!-- Progress -->
-  <div class="prog" id="prog">
-    <div class="prog-top"><span>🐻 ANALIZANDO</span><span id="prog-pct">0%</span></div>
-    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
-    <div class="prog-msg" id="prog-msg">Conectando a Polymarket...</div>
-  </div>
-  <div class="err" id="err"></div>
-
-  <!-- Portfolio panel -->
-  <div class="port-panel" id="port-panel">
-    <div class="port-header">
-      <div>
-        <div class="port-title">🎯 Portafolio Óptimo</div>
-        <div class="port-sub">Calculado por Claude con toda la data</div>
-      </div>
-    </div>
-    <div class="port-body" id="port-body"></div>
-  </div>
-
-  <div class="filter-bar show" id="fbar2" style="display:none;margin-bottom:10px">
-    <button class="port-btn" id="port-btn" onclick="buildPortfolio()" style="width:auto;padding:7px 16px">
-      <span id="port-btn-lbl">🎯 Calcular Portafolio Óptimo</span>
-    </button>
-  </div>
-
-  <div id="mwrap">
-    <div class="empty">
-      <span class="empty-ico">🐻</span>
-      <div class="empty-t">Brownbear Oracle listo</div>
-      <div class="empty-s">Datos trending en vivo de Polymarket<br>Claude analiza cada mercado individualmente<br>y luego calcula el portafolio óptimo</div>
-    </div>
-  </div>
-
-  <div class="disc" id="disc" style="display:none">
-    ⚠ Solo fines educativos. Mercados de predicción implican riesgo financiero real. Verifica precios en polymarket.com antes de ejecutar. Nunca inviertas más de lo que puedes perder.
-  </div>
+  <img class="bear-img" src="bear.png" alt="Brown Bear">
+  <div class="brand">Brown Bear</div>
+  <a class="enter-btn" href="app.html">Enter</a>
+  <div class="footer">Spaghetti Labs &nbsp;·&nbsp; 2026</div>
 </div>
-
-<!-- ═══ SIDEBAR ════════════════════════════════════════════════════════════ -->
-<div class="sidebar" id="sidebar">
-  <button class="sb-close" onclick="document.getElementById('sidebar').classList.remove('open')">✕</button>
-
-  <div>
-    <div class="sb-title">🎯 Guía de Operación</div>
-    <div class="sb-sub">Selecciona tu monto por apuesta</div>
-  </div>
-
-  <div>
-    <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:6px;letter-spacing:.5px">MONTO POR POSICIÓN</div>
-    <div class="amt-grid">
-      <button class="amt-btn" onclick="selectAmt(5,this)">$5</button>
-      <button class="amt-btn" onclick="selectAmt(10,this)">$10</button>
-      <button class="amt-btn sel" onclick="selectAmt(15,this)">$15</button>
-      <button class="amt-btn" onclick="selectAmt(20,this)">$20</button>
-      <div class="amt-custom"><span>$</span><input type="number" placeholder="otro..." min="1" max="500" onchange="selectAmt(+this.value,null)"></div>
-    </div>
-  </div>
-
-  <div>
-    <div style="font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:8px;letter-spacing:.5px">PASOS A SEGUIR</div>
-    <div class="steps" id="steps"></div>
-  </div>
-
-  <div id="risk-wrap"></div>
-</div>
-</div>
-
-<button class="sb-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">📋</button>
-
-<script>
-const BACKEND = 'https://brownbear-backend-production.up.railway.app';
-let allMarkets = [], currentFilter = 'all', trendingOnly = false, minVol24k = 0;
-let scanning = false, selectedAmt = 15;
-const VOL_STEPS = [0, 1, 5, 10, 50, 100]; // in $k
-
-// ── Health ───────────────────────────────────────────────────────────────────
-async function checkHealth() {
-  try {
-    const r = await fetch(`${BACKEND}/health`);
-    if ((await r.json()).status === 'ok') setBadge(true);
-  } catch { setBadge(false); }
-}
-function setBadge(live) {
-  document.getElementById('live-badge').className = `live-badge ${live?'live':'demo'}`;
-  document.getElementById('live-dot').className = `live-dot ${live?'on':'off'}`;
-  document.getElementById('live-text').textContent = live ? 'LIVE DATA' : 'OFFLINE';
-}
-
-// ── Filters ───────────────────────────────────────────────────────────────────
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.fb:not(#trend-btn)').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  rerenderAll();
-}
-function toggleTrending(btn) {
-  trendingOnly = !trendingOnly;
-  btn.classList.toggle('trending-on', trendingOnly);
-  btn.classList.toggle('on', false);
-  rerenderAll();
-}
-function updateVolFilter() {
-  const v = +document.getElementById('vol-slider').value;
-  minVol24k = VOL_STEPS[v];
-  document.getElementById('vol-val').textContent = minVol24k === 0 ? 'All' : `$${minVol24k}K+`;
-  rerenderAll();
-}
-function passes(m) {
-  const a = m.analysis;
-  if (trendingOnly && (m.volume24hr || 0) < 10000) return false;
-  if (minVol24k > 0 && (m.volume24hr || 0) < minVol24k * 1000) return false;
-  if (currentFilter === 'all') return true;
-  if (!a) return false;
-  if (currentFilter === 'edge') return Math.abs(a.edge||0) >= 12;
-  if (currentFilter === 'conf') return a.confidence === 'high';
-  if (currentFilter === 'yes') return a.betDirection === 'YES';
-  if (currentFilter === 'no') return a.betDirection === 'NO';
-  return true;
-}
-
-// ── Scoring ───────────────────────────────────────────────────────────────────
-function score(m) {
-  const a = m.analysis;
-  if (!a || a.betDirection === 'SKIP') return 0;
-  const e = Math.abs(a.edge||0);
-  const c = a.confidence === 'high' ? 20 : a.confidence === 'medium' ? 10 : 0;
-  const v = m.volume24hr > 100000 ? 15 : m.volume24hr > 50000 ? 10 : m.volume24hr > 10000 ? 5 : 0;
-  return e + c + v;
-}
-function bestId() {
-  const a = allMarkets.filter(m => m.analysis && m.analysis.betDirection !== 'SKIP');
-  return a.length ? a.reduce((b,m) => score(m)>score(b)?m:b).id : null;
-}
-
-// ── Scan ──────────────────────────────────────────────────────────────────────
-async function runScan() {
-  if (scanning) return;
-  scanning = true; allMarkets = [];
-  document.getElementById('scan-btn').disabled = true;
-  document.getElementById('scan-lbl').textContent = 'SCANNING...';
-  document.getElementById('prog').classList.add('show');
-  document.getElementById('err').classList.remove('show');
-  document.getElementById('fbar').classList.add('show');
-  document.getElementById('vol-row').classList.add('show');
-  document.getElementById('disc').style.display = 'none';
-  document.getElementById('port-panel').classList.remove('show');
-  document.getElementById('fbar2').style.display = 'none';
-  document.getElementById('mwrap').innerHTML = '';
-  setP(5, 'Conectando a Polymarket...');
-
-  try {
-    const mr = await fetch(`${BACKEND}/markets?limit=12`);
-    if (!mr.ok) throw new Error(`Markets error: ${mr.status}`);
-    const md = await mr.json();
-    if (!md.success) throw new Error(md.error);
-    const mkts = md.markets;
-    setP(12, `${mkts.length} mercados trending encontrados...`);
-    document.getElementById('s-markets').textContent = mkts.length;
-    mkts.forEach(m => appendCard(m, null, true));
-
-    for (let i = 0; i < mkts.length; i++) {
-      const m = mkts[i];
-      setP(12 + Math.round((i/mkts.length)*83), `→ ${m.question.slice(0,52)}...`);
-      try {
-        const ar = await fetch(`${BACKEND}/analyze`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({market:m})});
-        const ad = await ar.json();
-        allMarkets.push({...m, analysis: ad.success ? ad.analysis : null});
-      } catch { allMarkets.push({...m, analysis:null}); }
-      setP(12 + Math.round(((i+1)/mkts.length)*83), `✓ ${i+1}/${mkts.length} analizados`);
-      updateStats();
-    }
-
-    setP(100, '✓ Análisis completo — calculando portafolio...');
-    rerenderAll();
-
-    // Auto-trigger portfolio
-    await buildPortfolio();
-
-    setTimeout(() => document.getElementById('prog').classList.remove('show'), 1000);
-    document.getElementById('disc').style.display = 'block';
-    document.getElementById('fbar2').style.display = 'flex';
-
-  } catch(e) {
-    const b = document.getElementById('err');
-    b.textContent = '⚠ ' + e.message; b.classList.add('show');
-    document.getElementById('prog').classList.remove('show');
-  }
-
-  document.getElementById('scan-btn').disabled = false;
-  document.getElementById('scan-lbl').textContent = 'RE-SCAN';
-  scanning = false;
-}
-
-// ── Portfolio ─────────────────────────────────────────────────────────────────
-async function buildPortfolio() {
-  const btn = document.getElementById('port-btn');
-  const lbl = document.getElementById('port-btn-lbl');
-  if (btn) { btn.disabled = true; lbl.textContent = '⟳ Calculando...'; }
-
-  try {
-    const res = await fetch(`${BACKEND}/portfolio`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ markets: allMarkets, bankroll: 100 })
-    });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error);
-    renderPortfolio(data.portfolio);
-  } catch(e) {
-    console.error('Portfolio error:', e.message);
-  }
-
-  if (btn) { btn.disabled = false; lbl.textContent = '🔄 Recalcular Portafolio'; }
-}
-
-function renderPortfolio(p) {
-  const panel = document.getElementById('port-panel');
-  const body = document.getElementById('port-body');
-  if (!p?.positions?.length) return;
-
-  const posHTML = p.positions.map(pos => {
-    const dc = pos.direction === 'YES' ? 'dy' : 'dn';
-    return `<div class="port-pos">
-      <div class="port-pos-top">
-        <div class="port-pos-q">${pos.question}</div>
-        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-          <span class="db ${dc}">${pos.direction === 'YES' ? '▲ YES' : '▼ NO'}</span>
-          <span class="port-pos-bet">$${(+pos.betSize).toFixed(2)}</span>
-        </div>
-      </div>
-      <div class="port-pos-why">💡 ${pos.reasoning}</div>
-    </div>`;
-  }).join('');
-
-  body.innerHTML = `
-    <div class="port-reasoning">🐻 ${p.portfolioReasoning}</div>
-    <div class="port-positions">${posHTML}</div>
-    <div class="port-summary">
-      <div class="port-sum-item"><span class="port-sum-val" style="color:var(--bear)">$${(+p.totalBet||0).toFixed(0)}</span><span class="port-sum-lbl">Total apostado</span></div>
-      <div class="port-sum-item"><span class="port-sum-val" style="color:var(--green)">+$${(+p.expectedReturn||0).toFixed(0)}</span><span class="port-sum-lbl">Retorno esperado</span></div>
-      <div class="port-sum-item"><span class="port-sum-val" style="color:var(--muted)">$${(+p.reserveAmt||0).toFixed(0)}</span><span class="port-sum-lbl">En reserva</span></div>
-    </div>`;
-
-  panel.classList.add('show');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-// ── Render ────────────────────────────────────────────────────────────────────
-function setP(pct, msg) {
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-pct').textContent = pct + '%';
-  if (msg) document.getElementById('prog-msg').textContent = msg;
-}
-function updateStats() {
-  const a = allMarkets.filter(m => m.analysis);
-  const e = a.filter(m => m.analysis.betDirection !== 'SKIP' && Math.abs(m.analysis.edge||0) >= 10);
-  const avg = a.length ? (a.reduce((s,m)=>s+Math.abs(m.analysis?.edge||0),0)/a.length).toFixed(1)+'%' : '—';
-  document.getElementById('s-edges').textContent = e.length || '—';
-  document.getElementById('s-avg').textContent = avg;
-}
-function cardCls(a) {
-  if (!a) return 'lc';
-  if (a.betDirection === 'SKIP') return 'skp';
-  if (Math.abs(a.edge||0) < 5) return 'neu';
-  return a.edge > 0 ? 'pos' : 'neg';
-}
-function rerenderAll() {
-  const wrap = document.getElementById('mwrap');
-  wrap.innerHTML = '';
-  const bid = bestId();
-  [...allMarkets].filter(passes).sort((a,b)=>score(b)-score(a)).forEach(m => {
-    const div = document.createElement('div');
-    const ib = m.id === bid;
-    div.className = `card ${cardCls(m.analysis)}${ib?' best-card':''}`;
-    div.id = `card-${m.id}`;
-    div.innerHTML = buildHTML(m, m.analysis, false, ib);
-    wrap.appendChild(div);
-  });
-}
-function appendCard(m, a, isSkel) {
-  const wrap = document.getElementById('mwrap');
-  const div = document.createElement('div');
-  div.className = 'card lc'; div.id = `card-${m.id}`;
-  div.innerHTML = buildHTML(m, a, isSkel, false);
-  wrap.appendChild(div);
-}
-function buildHTML(m, a, isSkel, isBest) {
-  const yp = m.yesPrice || 0.5;
-  const v24 = m.volume24hr || 0;
-  const isTrend = v24 > 50000;
-  let numsHTML = '';
-  if (isSkel || !a) {
-    numsHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-      <div class="skel" style="width:60px;height:16px"></div>
-      <div class="skel" style="width:70px;height:11px"></div>
-      <div class="atag"><span class="spin">⟳</span> analyzing</div></div>`;
-  } else {
-    const ec = a.edge>0?'ep':a.edge<-5?'en':'ez';
-    const ac = a.edge>0?'pp':a.edge<-5?'pn':'pz';
-    const dc = a.betDirection==='YES'?'dy':a.betDirection==='NO'?'dn':'ds';
-    const dt = a.betDirection==='YES'?'▲ BUY YES':a.betDirection==='NO'?'▼ BUY NO':'— SKIP';
-    numsHTML = `<div class="cn">
-      <span class="ev ${ec}">${a.edge>0?'+':''}${(a.edge||0).toFixed(1)}%</span>
-      <div class="pr"><span class="pm">MKT ${(yp*100).toFixed(0)}%</span><span class="pai ${ac}">AI ${a.trueProbability}%</span></div>
-      <span class="db ${dc}">${dt}</span></div>`;
-  }
-  let expHTML = '';
-  if (a) {
-    const da = ((a.allocatePct||0)/100*selectedAmt).toFixed(2);
-    const pr = a.betDirection!=='SKIP'
-      ? a.betDirection==='YES'?(+da/yp*(1-yp)).toFixed(2):(+da/(1-yp)*yp).toFixed(2)
-      : '0';
-    expHTML = `<div class="cexp" id="exp-${m.id}">
-      <div class="reasoning">🐻 ${a.reasoning}</div>
-      ${m.url?`<a class="poly-link" href="${m.url}" target="_blank">→ Ver en Polymarket ↗</a>`:''}
-      <div class="pg">
-        <div class="pi"><span class="piv">$${da}</span><span class="pil">Apuesta</span></div>
-        <div class="pi"><span class="piv">${a.allocatePct}%</span><span class="pil">Bankroll</span></div>
-        <div class="pi"><span class="piv" style="color:var(--green)">+$${pr}</span><span class="pil">Si ganas</span></div>
-      </div></div>`;
-  }
-  const bb = a&&a.biasDetected&&!['none','None','NONE'].includes(a.biasDetected)?`<span class="badge bbias">⚠ ${a.biasDetected}</span>`:'';
-  const cb = a?`<span class="badge bconf">${a.confidence==='high'?'●':a.confidence==='medium'?'◑':'○'} ${a.confidence}</span>`:'';
-  const v24str = v24>1000?(v24/1000).toFixed(0)+'K':v24.toFixed(0);
-
-  return `<div class="cm" onclick="toggleCard('${m.id}')">
-    <div>
-      ${isBest?`<div class="best-badge">💫 MEJOR OPORTUNIDAD</div>`:''}
-      ${isTrend?`<div class="trend-badge">🔥 TRENDING</div>`:''}
-      <span class="card-cat">${m.category}</span>
-      <div class="card-q">${m.question}</div>
-      <div class="card-meta">
-        <span class="badge bvol">24H $${v24str}</span>${bb}${cb}
-      </div>
-    </div>${numsHTML}</div>${expHTML}`;
-}
-function toggleCard(id) {
-  const e = document.getElementById(`exp-${id}`);
-  if (e) e.classList.toggle('open');
-}
-
-// ── Sidebar ────────────────────────────────────────────────────────────────────
-function selectAmt(val, btn) {
-  selectedAmt = parseFloat(val)||15;
-  document.querySelectorAll('.amt-btn').forEach(b=>b.classList.remove('sel'));
-  if (btn) btn.classList.add('sel');
-  renderGuide();
-}
-function renderGuide() {
-  const amt = selectedAmt;
-  document.getElementById('steps').innerHTML = [
-    ['1','Escanear',`Presiona <strong>SCAN MARKETS</strong>. Claude trae los mercados con mayor actividad en las últimas 24h.`],
-    ['2','Ver Portafolio',`El panel <strong>🎯 Portafolio Óptimo</strong> aparece automáticamente. Claude analiza toda la data y elige las mejores posiciones para tu bankroll.`],
-    ['3','Revisar 💫',`La tarjeta con <strong>💫 MEJOR OPORTUNIDAD</strong> es el pick #1. Haz click para ver el razonamiento completo.`],
-    ['4','Verificar precio',`Click en <strong>"→ Ver en Polymarket ↗"</strong>. Confirma que el precio actual está cerca del que muestra Oracle. Diferencia &gt;10%? Recalcula.`],
-    ['5',`Apostar $${amt}`,`En Polymarket, click en <strong>Buy YES</strong> o <strong>Buy NO</strong>. Ingresa <strong>$${amt} USDC</strong> y confirma con tu wallet.`],
-    ['6','Esperar cierre',`El mercado paga automáticamente al cierre. Puedes vender antes en el mercado secundario si quieres salir anticipado.`]
-  ].map(([n,l,b])=>`<div class="step"><div class="step-row"><div class="step-n">${n}</div><div class="step-lbl">${l}</div></div><div class="step-body">${b}</div></div>`).join('');
-
-  const rsk = amt<=5?['low','🟢 RIESGO BAJO',[`$${amt} por posición`,`Ideal para aprender`,`Pérdida máx: $${amt}`]]
-    :amt<=15?['med','🟡 MODERADO',[`$${amt} por posición`,`Solo edge ≥12% + High Conf`,`Máx 3 posiciones activas`]]
-    :['hi','🔴 ALTO',[`$${amt} por posición`,`Solo edge ≥20% + High Conf`,`Verifica precios manualmente`]];
-  document.getElementById('risk-wrap').innerHTML=`<div class="risk-box ${rsk[0]}"><div class="risk-t">${rsk[1]}</div>${rsk[2].map(i=>`<div class="risk-i">· ${i}</div>`).join('')}</div>`;
-}
-
-// ── Boot ──────────────────────────────────────────────────────────────────────
-checkHealth();
-renderGuide();
-</script>
 </body>
 </html>
