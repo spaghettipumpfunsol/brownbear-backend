@@ -37,14 +37,16 @@ app.get("/markets", async (req, res) => {
           const prices = JSON.parse(m.outcomePrices || "[]");
           const yesPrice = parseFloat(prices[0]);
           const vol24 = parseFloat(m.volume24hr || 0);
+          const category = detectCategory(m.question);
           return (
             prices.length >= 2 &&
             m.question &&
-            vol24 > 500 &&           // trending: activo en las últimas 24h
+            vol24 > 500 &&
             yesPrice > 0.03 &&
             yesPrice < 0.97 &&
             m.active &&
-            !m.closed
+            !m.closed &&
+            category !== "Sports"  // ← Elimina deportes
           );
         } catch { return false; }
       })
@@ -75,7 +77,7 @@ app.get("/markets", async (req, res) => {
   }
 });
 
-// ─── POST /analyze — Analiza un mercado con Claude ───────────────────────────
+// ─── POST /analyze — Analiza un mercado con Claude + noticias recientes ────────
 app.post("/analyze", async (req, res) => {
   const { market } = req.body;
   if (!market) return res.status(400).json({ success: false, error: "market requerido" });
@@ -93,21 +95,39 @@ app.post("/analyze", async (req, res) => {
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
-        max_tokens: 500,
-        system: `You are a world-class prediction market analyst. Detect mispricings from cognitive biases.
-Key insight: markets OVERVALUE dramatic outcomes and UNDERVALUE status quo.
-Respond ONLY with a raw JSON object. No markdown, no backticks, no explanation.`,
+        max_tokens: 800,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        system: `You are a world-class prediction market analyst with access to real-time news.
+Your process:
+1. Search for recent news about the market topic (last 7 days)
+2. Check historical base rates for this type of event
+3. Compare market price vs true probability based on news + base rates
+4. Identify cognitive biases causing mispricing
+
+Key rules:
+- NEVER recommend Sports markets
+- Only recommend Politics, Macro, Crypto, Geopolitics, Tech
+- If recent news contradicts the edge, set confidence to "low" and betDirection to "SKIP"
+- Base rates matter: military interventions ~3-5%, political incumbents win ~65%, Fed cuts when inflation >3% ~15%
+- Respond ONLY with raw JSON. No markdown, no backticks.`,
         messages: [{
           role: "user",
-          content: `Analyze this Polymarket prediction market:
+          content: `Search for recent news about this market, then analyze it:
+
 Question: "${market.question}"
+Category: ${market.category}
 Current YES price: ${(market.yesPrice * 100).toFixed(1)}%
-Volume: $${parseInt(market.volume || 0).toLocaleString()}
-Liquidity: $${parseInt(market.liquidity || 0).toLocaleString()}
+Volume 24h: $${parseInt(market.volume24hr || 0).toLocaleString()}
 End date: ${market.endDate || "Unknown"}
 
-Return ONLY this JSON object:
-{"trueProbability":65,"edge":11,"betDirection":"YES","confidence":"high","reasoning":"Two sentence explanation of the mispricing and edge.","biasDetected":"Hype premium","allocatePct":10}`
+Steps:
+1. Search recent news: "${market.question}"
+2. Find historical base rate for this type of event
+3. Calculate true probability considering news + base rates
+4. Identify if news supports or contradicts the edge
+
+Return ONLY this JSON:
+{"trueProbability":65,"edge":11,"betDirection":"YES","confidence":"high","reasoning":"2 sentences: what news you found and why the edge exists despite or because of it.","biasDetected":"Availability bias","newsContext":"1 sentence summary of key recent news found","allocatePct":10}`
         }]
       })
     });
@@ -240,13 +260,17 @@ function buildPolyUrl(m) {
 
 function detectCategory(question = "") {
   const q = question.toLowerCase();
-  if (q.match(/bitcoin|btc|eth|sol|crypto|token|blockchain/)) return "Crypto";
-  if (q.match(/trump|biden|election|president|senate|congress|democrat|republican/)) return "Politics";
-  if (q.match(/fed|rate|inflation|gdp|recession|economy|market|s&p|dow/)) return "Macro";
-  if (q.match(/nba|nfl|world cup|champion|soccer|football|basketball/)) return "Sports";
-  if (q.match(/ai|openai|gpt|nvidia|tech|apple|google|meta/)) return "Tech";
+  if (q.match(/bitcoin|btc|eth|sol|crypto|token|blockchain|defi|nft|web3/)) return "Crypto";
+  if (q.match(/trump|biden|harris|election|president|senate|congress|democrat|republican|minister|chancellor|vote|poll|govern/)) return "Politics";
+  if (q.match(/fed|rate|inflation|gdp|recession|economy|market|s&p|dow|nasdaq|treasury|bond|yield|unemployment/)) return "Macro";
+  if (q.match(/iran|russia|ukraine|china|taiwan|israel|gaza|war|military|troops|ceasefire|sanctions|nato|conflict/)) return "Geopolitics";
+  if (q.match(/ai|openai|gpt|nvidia|tech|apple|google|meta|microsoft|amazon|startup/)) return "Tech";
+  if (q.match(/nba|nfl|nhl|mlb|world cup|champion|soccer|football|basketball|baseball|hockey|tennis|golf|cricket|ipl|serie a|premier league|laliga|bundesliga|match|game|player|team|vs\.|versus/)) return "Sports";
   return "World";
 }
+
+// Categorías válidas para operar — sin deportes
+const VALID_CATEGORIES = ["Crypto", "Politics", "Macro", "Geopolitics", "Tech", "World"];
 
 app.listen(PORT, () => {
   console.log(`\n🐻 Brownbear Oracle Backend — puerto ${PORT}`);
